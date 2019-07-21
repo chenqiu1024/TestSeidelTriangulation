@@ -21,13 +21,19 @@
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2OL-Uf-tNa">
                                 <rect key="frame" x="176" y="433" width="62" height="30"/>
                                 <state key="normal" title="添加顶点"/>
+                                <connections>
+                                    <action selector="onAddButtonClicked:" destination="BYZ-38-t0r" eventType="touchUpInside" id="lak-jT-RuW"/>
+                                </connections>
                             </button>
                             <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kxZ-l4-diU">
                                 <rect key="frame" x="250" y="433" width="62" height="30"/>
                                 <state key="normal" title="完结轮廓"/>
+                                <connections>
+                                    <action selector="onFinishButtonClicked:" destination="BYZ-38-t0r" eventType="touchUpInside" id="eTO-eU-t3d"/>
+                                </connections>
                             </button>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="0" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Nhu-Or-RVG">
-                                <rect key="frame" x="201.5" y="411" width="11.5" height="22"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Nhu-Or-RVG">
+                                <rect key="frame" x="201.5" y="403" width="11.5" height="22"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <nil key="highlightedColor"/>
@@ -41,6 +47,7 @@
                             <constraint firstItem="2OL-Uf-tNa" firstAttribute="centerX" secondItem="Nhu-Or-RVG" secondAttribute="centerX" id="IK2-Q8-k6I"/>
                             <constraint firstItem="2OL-Uf-tNa" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="WUz-wC-rgP"/>
                             <constraint firstItem="kxZ-l4-diU" firstAttribute="centerY" secondItem="2OL-Uf-tNa" secondAttribute="centerY" id="WnF-wb-l85"/>
+                            <constraint firstItem="2OL-Uf-tNa" firstAttribute="top" secondItem="Nhu-Or-RVG" secondAttribute="bottom" constant="8" id="mGP-Hx-dV9"/>
                             <constraint firstItem="kxZ-l4-diU" firstAttribute="leading" secondItem="2OL-Uf-tNa" secondAttribute="trailing" constant="12" id="yFz-f7-P4r"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>

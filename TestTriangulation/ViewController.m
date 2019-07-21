@@ -15,17 +15,24 @@
 @property (nonatomic, strong) MTKView* mtView;
 @property (nonatomic, strong) id<MTLCommandQueue> mtCommandQueue;
 @property (nonatomic, strong) id<MTLRenderPipelineState> primitiveRenderPipeline;
-@property (nonatomic, assign) vector_float2* polygonVerticesData;
 
 @property (nonatomic, strong) IBOutlet UIButton* addButton;
 @property (nonatomic, strong) IBOutlet UIButton* finishButton;
 @property (nonatomic, strong) IBOutlet UILabel* infoLabel;
 
+-(IBAction) onAddButtonClicked:(id)sender;
+-(IBAction) onFinishButtonClicked:(id)sender;
+
 @property (nonatomic, assign) int stage;
 
-@property (nonatomic, assign) CGPoint cursor;
+@property (nonatomic, assign) vector_float2 cursor;
 
-@property (nonatomic, strong) NSMutableArray<NSMutableArray<NSValue* >* >* polygons;
+@property (nonatomic, assign) NSUInteger maxVerticesCount;
+@property (nonatomic, assign) vector_float2* polygonVerticesData;
+@property (nonatomic, assign) NSUInteger currentPolygonVerticesCount;
+@property (nonatomic, assign) NSUInteger totalVerticesCount;
+@property (nonatomic, strong) NSMutableArray<NSNumber* >* polygonSizes;
+
 
 @end
 
@@ -70,11 +77,31 @@
     [renderEncoder setVertexBytes:crossLines length:sizeof(crossLines) atIndex:VertexSlot];
     [renderEncoder setFragmentBytes:&yellowColor length:sizeof(vector_float4) atIndex:ColorSlot];
     [renderEncoder drawPrimitives:MTLPrimitiveTypeLine vertexStart:0 vertexCount:sizeof(crossLines)/sizeof(crossLines[0]) instanceCount:1];
-    /*
-    [renderEncoder setVertexBuffer:_polygonVerticesBuffer offset:0 atIndex:VertexSlot];
+
+    [renderEncoder setVertexBytes:_polygonVerticesData length:sizeof(vector_float2) * _totalVerticesCount atIndex:VertexSlot];
     [renderEncoder setFragmentBytes:&greenColor length:sizeof(vector_float4) atIndex:ColorSlot];
-    [renderEncoder drawPrimitives:MTLPrimitiveTypeLineStrip vertexStart:0 vertexCount:4 instanceCount:1];
-    //*/
+    int vertexIndex = 0;
+    uint32_t* endLineIndices = (uint32_t*) malloc(sizeof(uint32_t) * 2 * _polygonSizes.count);
+    uint32_t* pEndLineIndices = endLineIndices;
+    for (NSNumber* polygonSize in _polygonSizes)
+    {
+        uint32_t verticesCount = (uint32_t)[polygonSize integerValue];
+        [renderEncoder drawPrimitives:MTLPrimitiveTypeLineStrip vertexStart:vertexIndex vertexCount:verticesCount instanceCount:1];
+        *pEndLineIndices++ = vertexIndex;
+        *pEndLineIndices++ = vertexIndex + verticesCount - 1;
+        vertexIndex += verticesCount;
+    }
+    if (_polygonSizes.count > 0)
+    {
+        id<MTLBuffer> indices = [view.device newBufferWithBytes:endLineIndices length:(sizeof(uint32_t) * 2 * _polygonSizes.count) options:MTLResourceOptionCPUCacheModeDefault];
+        free(endLineIndices);
+        [renderEncoder drawIndexedPrimitives:MTLPrimitiveTypeLine indexCount:(2 * _polygonSizes.count) indexType:MTLIndexTypeUInt32 indexBuffer:indices indexBufferOffset:0];
+    }
+    if (_currentPolygonVerticesCount > 0)
+    {
+        [renderEncoder drawPrimitives:MTLPrimitiveTypeLineStrip vertexStart:vertexIndex vertexCount:_currentPolygonVerticesCount + 1 instanceCount:1];
+    }
+    
     [renderEncoder endEncoding];
 
     [commandBuffer presentDrawable:view.currentDrawable];
@@ -84,21 +111,24 @@
 
 -(void) onPanGestureRecognized:(UIPanGestureRecognizer*)recognizer {
     CGPoint touchPoint = [recognizer locationInView:recognizer.view];
-    _cursor = CGPointMake(touchPoint.x, recognizer.view.bounds.size.height - touchPoint.y);
+    _cursor = (vector_float2){touchPoint.x, recognizer.view.bounds.size.height - touchPoint.y};
+    _polygonVerticesData[_totalVerticesCount] = _cursor;
 }
 
--(void) onAddButtonClicked:(id)sender {
+-(IBAction) onAddButtonClicked:(id)sender {
     switch (_stage)
     {
         case 0:
         {
-            NSMutableArray<NSValue* >* polygon = [_polygons lastObject];
-            if (!polygon)
+            _polygonVerticesData[_totalVerticesCount++] = _cursor;
+            _polygonVerticesData[_totalVerticesCount] = _cursor;
+            _currentPolygonVerticesCount++;
+            _finishButton.enabled = (_currentPolygonVerticesCount > 2);
+            _finishButton.hidden = !(_currentPolygonVerticesCount > 2);
+            if (_totalVerticesCount == _maxVerticesCount)
             {
-                polygon = [[NSMutableArray alloc] init];
-                [_polygons addObject:polygon];
+                _addButton.enabled = NO;
             }
-            [polygon addObject:[NSValue valueWithCGPoint:_cursor]];
         }
             break;
             
@@ -107,18 +137,24 @@
     }
 }
 
--(void) onFinishButtonClicked:(id)sender {
+-(IBAction) onFinishButtonClicked:(id)sender {
     switch (_stage)
     {
         case 0:
         {
-            
+            [_polygonSizes addObject:@(_currentPolygonVerticesCount)];
+            _currentPolygonVerticesCount = 0;
+            _finishButton.enabled = NO;
         }
             break;
             
         default:
             break;
     }
+}
+
+-(void) dealloc {
+    free(_polygonVerticesData);
 }
 
 - (void)viewDidLoad {
@@ -141,9 +177,12 @@
     _primitiveRenderPipeline = [_mtView.device newRenderPipelineStateWithDescriptor:renderPipelineDesc error:nil];
     
     _stage = 0;
-    _cursor = CGPointMake(self.view.bounds.size.width / 2, self.view.bounds.size.height / 2);
-    _polygons = [[NSMutableArray alloc] init];
-    _polygonVerticesData = NULL;
+    _cursor = (vector_float2){self.view.bounds.size.width / 2, self.view.bounds.size.height / 2};
+    _maxVerticesCount = 1024;
+    _polygonSizes = [[NSMutableArray alloc] init];
+    _currentPolygonVerticesCount = 0;
+    _totalVerticesCount = 0;
+    _polygonVerticesData = (vector_float2*) malloc(sizeof(vector_float2) * _maxVerticesCount);
     
     UIPanGestureRecognizer* panRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(onPanGestureRecognized:)];
     [_mtView addGestureRecognizer:panRecognizer];
