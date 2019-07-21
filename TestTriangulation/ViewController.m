@@ -62,11 +62,11 @@
     
     vector_float2 crossLines[] = {
         //*
-        (vector_float2){0.f, _cursor.y},
-        (vector_float2){viewsize.x, _cursor.y},
+        (vector_float2){-1.f, _cursor.y},
+        (vector_float2){1.f, _cursor.y},
         
-        (vector_float2){_cursor.x, 0.f},
-        (vector_float2){_cursor.x, viewsize.y},
+        (vector_float2){_cursor.x, -1.f},
+        (vector_float2){_cursor.x, 1.f},
         /*/
         (vector_float2){-1.f, 0.f},
         (vector_float2){1.f, 0.f},
@@ -119,7 +119,7 @@
 
 -(void) onPanGestureRecognized:(UIPanGestureRecognizer*)recognizer {
     CGPoint touchPoint = [recognizer locationInView:recognizer.view];
-    _cursor = (vector_float2){touchPoint.x, recognizer.view.bounds.size.height - touchPoint.y};
+    _cursor = (vector_float2){(touchPoint.x / recognizer.view.bounds.size.width - 0.5f) * 2.f, (0.5f - touchPoint.y / recognizer.view.bounds.size.height) * 2.f};
     _polygonVerticesData[_totalVerticesCount] = _cursor;
 }
 
@@ -185,7 +185,8 @@
     _primitiveRenderPipeline = [_mtView.device newRenderPipelineStateWithDescriptor:renderPipelineDesc error:nil];
     
     _stage = 0;
-    _cursor = (vector_float2){self.view.bounds.size.width / 2, self.view.bounds.size.height / 2};
+    //_cursor = (vector_float2){self.view.bounds.size.width / 2, self.view.bounds.size.height / 2};
+    _cursor = (vector_float2){0.f, 0.f};
     _maxVerticesCount = 1024;
     _polygonSizes = [[NSMutableArray alloc] init];
     _currentPolygonVerticesCount = 0;

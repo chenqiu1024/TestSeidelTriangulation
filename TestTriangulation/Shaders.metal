@@ -14,8 +14,8 @@ using namespace metal;
 vertex float4 TrivialVertex2DFunction(constant float2* vertices [[buffer(VertexSlot)]]
                                       , constant float2& viewsize [[buffer(ViewportSlot)]]
                                       , uint vertexID [[vertex_id]]) {
-    return float4((vertices[vertexID] / viewsize - 0.5f) * 2.f, 0.f, 1.f);
-//    return float4(vertices[vertexID], 0.f, 1.f);
+//    return float4((vertices[vertexID] / viewsize - 0.5f) * 2.f, 0.f, 1.f);
+    return float4(vertices[vertexID], 0.f, 1.f);
 }
 
 fragment half4 TrivialFragmentFunction(constant float4& color [[buffer(ColorSlot)]]) {
