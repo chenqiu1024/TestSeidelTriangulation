@@ -78,21 +78,21 @@
     [renderEncoder setFragmentBytes:&yellowColor length:sizeof(vector_float4) atIndex:ColorSlot];
     [renderEncoder drawPrimitives:MTLPrimitiveTypeLine vertexStart:0 vertexCount:sizeof(crossLines)/sizeof(crossLines[0]) instanceCount:1];
 
-    [renderEncoder setVertexBytes:_polygonVerticesData length:sizeof(vector_float2) * _totalVerticesCount atIndex:VertexSlot];
+    [renderEncoder setVertexBytes:_polygonVerticesData length:sizeof(vector_float2) * (_totalVerticesCount + 1) atIndex:VertexSlot];
     [renderEncoder setFragmentBytes:&greenColor length:sizeof(vector_float4) atIndex:ColorSlot];
     int vertexIndex = 0;
-    uint32_t* endLineIndices = (uint32_t*) malloc(sizeof(uint32_t) * 2 * _polygonSizes.count);
-    uint32_t* pEndLineIndices = endLineIndices;
-    for (NSNumber* polygonSize in _polygonSizes)
-    {
-        uint32_t verticesCount = (uint32_t)[polygonSize integerValue];
-        [renderEncoder drawPrimitives:MTLPrimitiveTypeLineStrip vertexStart:vertexIndex vertexCount:verticesCount instanceCount:1];
-        *pEndLineIndices++ = vertexIndex;
-        *pEndLineIndices++ = vertexIndex + verticesCount - 1;
-        vertexIndex += verticesCount;
-    }
     if (_polygonSizes.count > 0)
     {
+        uint32_t* endLineIndices = (uint32_t*) malloc(sizeof(uint32_t) * 2 * _polygonSizes.count);
+        uint32_t* pEndLineIndices = endLineIndices;
+        for (NSNumber* polygonSize in _polygonSizes)
+        {
+            uint32_t verticesCount = (uint32_t)[polygonSize integerValue];
+            [renderEncoder drawPrimitives:MTLPrimitiveTypeLineStrip vertexStart:vertexIndex vertexCount:verticesCount instanceCount:1];
+            *pEndLineIndices++ = vertexIndex;
+            *pEndLineIndices++ = vertexIndex + verticesCount - 1;
+            vertexIndex += verticesCount;
+        }
         id<MTLBuffer> indices = [view.device newBufferWithBytes:endLineIndices length:(sizeof(uint32_t) * 2 * _polygonSizes.count) options:MTLResourceOptionCPUCacheModeDefault];
         free(endLineIndices);
         [renderEncoder drawIndexedPrimitives:MTLPrimitiveTypeLine indexCount:(2 * _polygonSizes.count) indexType:MTLIndexTypeUInt32 indexBuffer:indices indexBufferOffset:0];
