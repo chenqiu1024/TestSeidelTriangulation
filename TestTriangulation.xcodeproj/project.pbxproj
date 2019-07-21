@@ -15,6 +15,9 @@
 		5297B45A22E4309100E15BF6 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5297B45922E4309100E15BF6 /* main.m */; };
 		5297B46422E4309100E15BF6 /* TestTriangulationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 5297B46322E4309100E15BF6 /* TestTriangulationTests.m */; };
 		5297B46F22E4309100E15BF6 /* TestTriangulationUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 5297B46E22E4309100E15BF6 /* TestTriangulationUITests.m */; };
+		5297B47E22E430CC00E15BF6 /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5297B47D22E430CC00E15BF6 /* MetalKit.framework */; };
+		5297B48022E430D100E15BF6 /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5297B47F22E430D100E15BF6 /* Metal.framework */; };
+		5297B48422E4347900E15BF6 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 5297B48322E4347900E15BF6 /* Shaders.metal */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,6 +54,10 @@
 		5297B46A22E4309100E15BF6 /* TestTriangulationUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TestTriangulationUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5297B46E22E4309100E15BF6 /* TestTriangulationUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TestTriangulationUITests.m; sourceTree = "<group>"; };
 		5297B47022E4309100E15BF6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		5297B47D22E430CC00E15BF6 /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
+		5297B47F22E430D100E15BF6 /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
+		5297B48322E4347900E15BF6 /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
+		5297B48522E4560000E15BF6 /* ShaderDefines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderDefines.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +65,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5297B48022E430D100E15BF6 /* Metal.framework in Frameworks */,
+				5297B47E22E430CC00E15BF6 /* MetalKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -85,6 +94,7 @@
 				5297B46222E4309100E15BF6 /* TestTriangulationTests */,
 				5297B46D22E4309100E15BF6 /* TestTriangulationUITests */,
 				5297B44822E4309000E15BF6 /* Products */,
+				5297B47C22E430CC00E15BF6 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -110,6 +120,8 @@
 				5297B45522E4309100E15BF6 /* LaunchScreen.storyboard */,
 				5297B45822E4309100E15BF6 /* Info.plist */,
 				5297B45922E4309100E15BF6 /* main.m */,
+				5297B48322E4347900E15BF6 /* Shaders.metal */,
+				5297B48522E4560000E15BF6 /* ShaderDefines.h */,
 			);
 			path = TestTriangulation;
 			sourceTree = "<group>";
@@ -130,6 +142,15 @@
 				5297B47022E4309100E15BF6 /* Info.plist */,
 			);
 			path = TestTriangulationUITests;
+			sourceTree = "<group>";
+		};
+		5297B47C22E430CC00E15BF6 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				5297B47F22E430D100E15BF6 /* Metal.framework */,
+				5297B47D22E430CC00E15BF6 /* MetalKit.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -262,6 +283,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5297B48422E4347900E15BF6 /* Shaders.metal in Sources */,
 				5297B44F22E4309000E15BF6 /* ViewController.m in Sources */,
 				5297B45A22E4309100E15BF6 /* main.m in Sources */,
 				5297B44C22E4309000E15BF6 /* AppDelegate.m in Sources */,
