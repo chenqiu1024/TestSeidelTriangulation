@@ -15,6 +15,17 @@
 @property (nonatomic, strong) MTKView* mtView;
 @property (nonatomic, strong) id<MTLCommandQueue> mtCommandQueue;
 @property (nonatomic, strong) id<MTLRenderPipelineState> primitiveRenderPipeline;
+@property (nonatomic, assign) vector_float2* polygonVerticesData;
+
+@property (nonatomic, strong) IBOutlet UIButton* addButton;
+@property (nonatomic, strong) IBOutlet UIButton* finishButton;
+@property (nonatomic, strong) IBOutlet UILabel* infoLabel;
+
+@property (nonatomic, assign) int stage;
+
+@property (nonatomic, assign) CGPoint cursor;
+
+@property (nonatomic, strong) NSMutableArray<NSMutableArray<NSValue* >* >* polygons;
 
 @end
 
@@ -25,32 +36,89 @@
 }
 
 - (void)drawInMTKView:(nonnull MTKView *)view {
-    NSLog(@"drawInMTKView:");
+//    NSLog(@"drawInMTKView:");
     id<MTLCommandBuffer> commandBuffer = [_mtCommandQueue commandBuffer];
     [commandBuffer enqueue];
     
     _mtView.currentRenderPassDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(1, 1, 1, 1);
-    _mtView.clearColor = MTLClearColorMake(0, 1, 0, 1);
+    _mtView.clearColor = MTLClearColorMake(0, 0, 0, 1);
     
     id<MTLRenderCommandEncoder> renderEncoder = [commandBuffer renderCommandEncoderWithDescriptor:view.currentRenderPassDescriptor];
-    [renderEncoder setViewport:(MTLViewport){0.f, 0.f, view.bounds.size.width, view.bounds.size.height, 0.f, 1.f}];
     [renderEncoder setRenderPipelineState:_primitiveRenderPipeline];
     vector_float2 viewsize = (vector_float2){view.bounds.size.width, view.bounds.size.height};
-    vector_float2 vertices[] = {(vector_float2){0.f, viewsize.y},
-        (vector_float2){0.f, 0.f},
-        (vector_float2){viewsize.x, viewsize.y},
-        (vector_float2){viewsize.x, 0.f},
-    };
-    vector_float4 color = (vector_float4){1.f, 0.f, 0.f, 1.f};
+    float contentScale = view.layer.contentsScale;
+    [renderEncoder setViewport:(MTLViewport){0.f, 0.f, viewsize.x * contentScale, viewsize.y * contentScale, 0.f, 1.f}];
+    static const vector_float4 greenColor = (vector_float4){0.f, 1.f, 0.f, 1.f};
+    static const vector_float4 yellowColor = (vector_float4){1.f, 1.f, 0.f, 1.f};
     [renderEncoder setVertexBytes:&viewsize length:sizeof(viewsize) atIndex:ViewportSlot];
-    [renderEncoder setVertexBytes:vertices length:sizeof(vertices) atIndex:VertexSlot];
-    [renderEncoder setFragmentBytes:&color length:sizeof(color) atIndex:ColorSlot];
-    [renderEncoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4 instanceCount:1];
-    [renderEncoder endEncoding];
     
+    vector_float2 crossLines[] = {
+        //*
+        (vector_float2){0.f, _cursor.y},
+        (vector_float2){viewsize.x, _cursor.y},
+        
+        (vector_float2){_cursor.x, 0.f},
+        (vector_float2){_cursor.x, viewsize.y},
+        /*/
+        (vector_float2){-1.f, 0.f},
+        (vector_float2){1.f, 0.f},
+        
+        //(vector_float4){0.f, -1.f, 0.f, 1.f},
+        //(vector_float4){0.f, 1.f, 0.f, 1.f},
+        //*/
+    };
+    [renderEncoder setVertexBytes:crossLines length:sizeof(crossLines) atIndex:VertexSlot];
+    [renderEncoder setFragmentBytes:&yellowColor length:sizeof(vector_float4) atIndex:ColorSlot];
+    [renderEncoder drawPrimitives:MTLPrimitiveTypeLine vertexStart:0 vertexCount:sizeof(crossLines)/sizeof(crossLines[0]) instanceCount:1];
+    /*
+    [renderEncoder setVertexBuffer:_polygonVerticesBuffer offset:0 atIndex:VertexSlot];
+    [renderEncoder setFragmentBytes:&greenColor length:sizeof(vector_float4) atIndex:ColorSlot];
+    [renderEncoder drawPrimitives:MTLPrimitiveTypeLineStrip vertexStart:0 vertexCount:4 instanceCount:1];
+    //*/
+    [renderEncoder endEncoding];
+
     [commandBuffer presentDrawable:view.currentDrawable];
     [commandBuffer commit];
     
+}
+
+-(void) onPanGestureRecognized:(UIPanGestureRecognizer*)recognizer {
+    CGPoint touchPoint = [recognizer locationInView:recognizer.view];
+    _cursor = CGPointMake(touchPoint.x, recognizer.view.bounds.size.height - touchPoint.y);
+}
+
+-(void) onAddButtonClicked:(id)sender {
+    switch (_stage)
+    {
+        case 0:
+        {
+            NSMutableArray<NSValue* >* polygon = [_polygons lastObject];
+            if (!polygon)
+            {
+                polygon = [[NSMutableArray alloc] init];
+                [_polygons addObject:polygon];
+            }
+            [polygon addObject:[NSValue valueWithCGPoint:_cursor]];
+        }
+            break;
+            
+        default:
+            break;
+    }
+}
+
+-(void) onFinishButtonClicked:(id)sender {
+    switch (_stage)
+    {
+        case 0:
+        {
+            
+        }
+            break;
+            
+        default:
+            break;
+    }
 }
 
 - (void)viewDidLoad {
@@ -70,9 +138,15 @@
     renderPipelineDesc.colorAttachments[0].blendingEnabled = NO;
     renderPipelineDesc.vertexFunction = vertexFunction;
     renderPipelineDesc.fragmentFunction = fragmentFunction;
-    
     _primitiveRenderPipeline = [_mtView.device newRenderPipelineStateWithDescriptor:renderPipelineDesc error:nil];
     
+    _stage = 0;
+    _cursor = CGPointMake(self.view.bounds.size.width / 2, self.view.bounds.size.height / 2);
+    _polygons = [[NSMutableArray alloc] init];
+    _polygonVerticesData = NULL;
+    
+    UIPanGestureRecognizer* panRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(onPanGestureRecognized:)];
+    [_mtView addGestureRecognizer:panRecognizer];
 }
 
 

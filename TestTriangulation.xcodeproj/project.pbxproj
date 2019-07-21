@@ -18,6 +18,10 @@
 		5297B47E22E430CC00E15BF6 /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5297B47D22E430CC00E15BF6 /* MetalKit.framework */; };
 		5297B48022E430D100E15BF6 /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5297B47F22E430D100E15BF6 /* Metal.framework */; };
 		5297B48422E4347900E15BF6 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 5297B48322E4347900E15BF6 /* Shaders.metal */; };
+		5297B48E22E4B5DA00E15BF6 /* misc.c in Sources */ = {isa = PBXBuildFile; fileRef = 5297B48722E4B5DA00E15BF6 /* misc.c */; };
+		5297B48F22E4B5DA00E15BF6 /* tri.c in Sources */ = {isa = PBXBuildFile; fileRef = 5297B48822E4B5DA00E15BF6 /* tri.c */; };
+		5297B49022E4B5DA00E15BF6 /* construct.c in Sources */ = {isa = PBXBuildFile; fileRef = 5297B48922E4B5DA00E15BF6 /* construct.c */; };
+		5297B49222E4B5DA00E15BF6 /* monotone.c in Sources */ = {isa = PBXBuildFile; fileRef = 5297B48D22E4B5DA00E15BF6 /* monotone.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -58,6 +62,12 @@
 		5297B47F22E430D100E15BF6 /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
 		5297B48322E4347900E15BF6 /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		5297B48522E4560000E15BF6 /* ShaderDefines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderDefines.h; sourceTree = "<group>"; };
+		5297B48722E4B5DA00E15BF6 /* misc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = misc.c; sourceTree = "<group>"; };
+		5297B48822E4B5DA00E15BF6 /* tri.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tri.c; sourceTree = "<group>"; };
+		5297B48922E4B5DA00E15BF6 /* construct.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = construct.c; sourceTree = "<group>"; };
+		5297B48B22E4B5DA00E15BF6 /* interface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = interface.h; sourceTree = "<group>"; };
+		5297B48C22E4B5DA00E15BF6 /* triangulate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = triangulate.h; sourceTree = "<group>"; };
+		5297B48D22E4B5DA00E15BF6 /* monotone.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = monotone.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -111,6 +121,7 @@
 		5297B44922E4309000E15BF6 /* TestTriangulation */ = {
 			isa = PBXGroup;
 			children = (
+				5297B48622E4B5BC00E15BF6 /* seidel */,
 				5297B44A22E4309000E15BF6 /* AppDelegate.h */,
 				5297B44B22E4309000E15BF6 /* AppDelegate.m */,
 				5297B44D22E4309000E15BF6 /* ViewController.h */,
@@ -151,6 +162,19 @@
 				5297B47D22E430CC00E15BF6 /* MetalKit.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		5297B48622E4B5BC00E15BF6 /* seidel */ = {
+			isa = PBXGroup;
+			children = (
+				5297B48922E4B5DA00E15BF6 /* construct.c */,
+				5297B48B22E4B5DA00E15BF6 /* interface.h */,
+				5297B48722E4B5DA00E15BF6 /* misc.c */,
+				5297B48D22E4B5DA00E15BF6 /* monotone.c */,
+				5297B48822E4B5DA00E15BF6 /* tri.c */,
+				5297B48C22E4B5DA00E15BF6 /* triangulate.h */,
+			);
+			path = seidel;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -283,9 +307,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5297B48E22E4B5DA00E15BF6 /* misc.c in Sources */,
 				5297B48422E4347900E15BF6 /* Shaders.metal in Sources */,
+				5297B49222E4B5DA00E15BF6 /* monotone.c in Sources */,
 				5297B44F22E4309000E15BF6 /* ViewController.m in Sources */,
+				5297B48F22E4B5DA00E15BF6 /* tri.c in Sources */,
 				5297B45A22E4309100E15BF6 /* main.m in Sources */,
+				5297B49022E4B5DA00E15BF6 /* construct.c in Sources */,
 				5297B44C22E4309000E15BF6 /* AppDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
