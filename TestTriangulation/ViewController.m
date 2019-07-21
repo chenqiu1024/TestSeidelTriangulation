@@ -57,6 +57,7 @@
     [renderEncoder setViewport:(MTLViewport){0.f, 0.f, viewsize.x * contentScale, viewsize.y * contentScale, 0.f, 1.f}];
     static const vector_float4 greenColor = (vector_float4){0.f, 1.f, 0.f, 1.f};
     static const vector_float4 yellowColor = (vector_float4){1.f, 1.f, 0.f, 1.f};
+    static const vector_float4 whiteColor = (vector_float4){1.f, 1.f, 1.f, 1.f};
     [renderEncoder setVertexBytes:&viewsize length:sizeof(viewsize) atIndex:ViewportSlot];
     
     vector_float2 crossLines[] = {
@@ -100,6 +101,13 @@
     if (_currentPolygonVerticesCount > 0)
     {
         [renderEncoder drawPrimitives:MTLPrimitiveTypeLineStrip vertexStart:vertexIndex vertexCount:_currentPolygonVerticesCount + 1 instanceCount:1];
+        if (_currentPolygonVerticesCount > 2)
+        {
+            [renderEncoder setFragmentBytes:&whiteColor length:sizeof(vector_float4) atIndex:ColorSlot];
+            vector_float2 line[] = {_polygonVerticesData[vertexIndex], _polygonVerticesData[vertexIndex + _currentPolygonVerticesCount]};
+            [renderEncoder setVertexBytes:line length:sizeof(line) atIndex:VertexSlot];
+            [renderEncoder drawPrimitives:MTLPrimitiveTypeLine vertexStart:0 vertexCount:2];
+        }
     }
     
     [renderEncoder endEncoding];
