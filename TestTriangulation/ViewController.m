@@ -22,8 +22,8 @@ bool areLinesIntersect(vector_float2 line0s, vector_float2 line0e, vector_float2
     const float C1 = line1e.x * line1s.y - line1s.x * line1e.y;
     
     const float D = A0 * B1 - A1 * B0;
-    const float E = B1 * C0 - B0 * C1;
-    const float F = A0 * C1 - A1 * C0;
+    const float E = B0 * C1 - B1 * C0;
+    const float F = A1 * C0 - A0 * C1;
     if (fabsf(D) <= Epsilon)
     {// Parallel
         if (fabsf(E) <= Epsilon && fabsf(F) <= Epsilon)
