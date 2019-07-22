@@ -220,10 +220,11 @@ bool isPointInPolygon(vector_float2 point, const vector_float2* polygonVertices,
             vertexIndex += verticesCount;
         }
     }
+    vector_float2 currentPoint = _polygonVerticesData[vertexIndex + _currentPolygonVerticesCount];
     if (_currentPolygonVerticesCount > 0)
     {
-        vector_float2 currentLine[] = {_polygonVerticesData[vertexIndex + _currentPolygonVerticesCount - 1], _polygonVerticesData[vertexIndex + _currentPolygonVerticesCount]};
-        vector_float2 closeLine[] = {_polygonVerticesData[vertexIndex], _polygonVerticesData[vertexIndex + _currentPolygonVerticesCount]};
+        vector_float2 currentLine[] = {_polygonVerticesData[vertexIndex + _currentPolygonVerticesCount - 1], currentPoint};
+        vector_float2 closeLine[] = {_polygonVerticesData[vertexIndex], currentPoint};
         vertexIndex = 0;
         for (NSNumber* polygonSize in _polygonSizes)
         {
@@ -280,7 +281,32 @@ bool isPointInPolygon(vector_float2 point, const vector_float2* polygonVertices,
         }
     }
 
-    
+    if (_isCurrentLineValid)
+    {
+        vector_float2* polygonStart = _polygonVerticesData;
+        for (NSInteger i = 0; i < _polygonSizes.count; ++i)
+        {
+            size_t polygonSize = (size_t)[_polygonSizes[i] integerValue];
+            if (0 == i)
+            {
+                if (!isPointInPolygon(currentPoint, polygonStart, polygonSize))
+                {
+                    _isCurrentLineValid = false;
+                    break;
+                }
+            }
+            else
+            {
+                if (isPointInPolygon(currentPoint, polygonStart, polygonSize))
+                {
+                    _isCurrentLineValid = false;
+                    break;
+                }
+            }
+            polygonStart += polygonSize;
+        }
+    }
+
     _addButton.enabled = _isCurrentLineValid;
     _finishButton.enabled = _isCloseLineValid;
 }
@@ -440,9 +466,6 @@ bool isPointInPolygon(vector_float2 point, const vector_float2* polygonVertices,
             
             [self updateEndLineIndicesBuffer];
             [self validateGeometry];
-            
-            //For Test:
-            _stage = 1;
         }
             break;
             
