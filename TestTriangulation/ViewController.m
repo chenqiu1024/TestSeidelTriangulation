@@ -125,6 +125,36 @@ bool isLinesIntersectWithLines(vector_float2 line0s, vector_float2 line0e, const
     return false;
 }
 
+bool isPointInPolygon(vector_float2 point, const vector_float2* polygonVertices, size_t polygonSize) {
+    int signSum = 0;
+    const vector_float2* pVertex = polygonVertices;
+    for (size_t i = polygonSize - 1; i > 0; --i)
+    {
+        vector_float2 p0 = *pVertex++;
+        vector_float2 p1 = *pVertex;
+        if (p0.y == p1.y) continue;
+        
+        float dY0 = point.y - p0.y;
+        float dY1 = p1.y - point.y;
+        if (dY0 * dY1 < 0) continue;
+        
+        // (x - x0) / (x1 - x0) = (y - y0) / (y1 - y0)
+        float intersectX = p0.x + (point.y - p0.y) * (p1.x - p0.x) / (p1.y - p0.y);
+        if (intersectX > point.x) continue;
+        
+        if (dY0 > 0)
+            signSum++;
+        else if (dY0 < 0)
+            signSum--;
+        
+        if (dY1 > 0)
+            signSum++;
+        else if (dY1 < 0)
+            signSum--;
+    }
+    return (signSum != 0);
+}
+
 @interface ViewController () <MTKViewDelegate>
 
 @property (nonatomic, strong) MTKView* mtView;
