@@ -8,6 +8,7 @@
 
 #import "ViewController.h"
 #import "ShaderDefines.h"
+#import "interface.h"
 #import <MetalKit/MetalKit.h>
 #import <simd/simd.h>
 
@@ -106,7 +107,7 @@ bool areLinesIntersect(vector_float2 line0s, vector_float2 line0e, vector_float2
 
 bool isLinesIntersectWithLineStrip(vector_float2 line0s, vector_float2 line0e, const vector_float2* lines, size_t linesCount) {
     const vector_float2* pPoint0 = lines;
-    for (int i=linesCount; i>0; --i)
+    for (size_t i=linesCount; i>0; --i)
     {
         if (areLinesIntersect(line0s, line0e, pPoint0[0], pPoint0[1])) return true;
         pPoint0++;
@@ -116,7 +117,7 @@ bool isLinesIntersectWithLineStrip(vector_float2 line0s, vector_float2 line0e, c
 
 bool isLinesIntersectWithLines(vector_float2 line0s, vector_float2 line0e, const vector_float2* points, const uint32_t* indices, size_t linesCount) {
     const uint32_t* pIndex = indices;
-    for (int i=linesCount; i>0; --i)
+    for (size_t i=linesCount; i>0; --i)
     {
         if (areLinesIntersect(line0s, line0e, points[pIndex[0]], points[pIndex[1]])) return true;
         pIndex += 2;
@@ -249,6 +250,9 @@ bool isLinesIntersectWithLines(vector_float2 line0s, vector_float2 line0e, const
             }
         }
     }
+    
+    _addButton.enabled = _isCurrentLineValid;
+    _finishButton.enabled = _isCloseLineValid;
 }
 
 - (void)mtkView:(nonnull MTKView *)view drawableSizeWillChange:(CGSize)size {
@@ -263,7 +267,7 @@ bool isLinesIntersectWithLines(vector_float2 line0s, vector_float2 line0e, const
     if (!_isCurrentLineValid)
         _mtView.clearColor = MTLClearColorMake(1, 0, 0, 1);
     else if (!_isCloseLineValid)
-        _mtView.clearColor = MTLClearColorMake(0.75, 0.75, 0.5, 1);
+        _mtView.clearColor = MTLClearColorMake(1.0, 0.5, 0.5, 1);
     else
         _mtView.clearColor = MTLClearColorMake(0, 0, 0, 1);
     
@@ -337,8 +341,6 @@ bool isLinesIntersectWithLines(vector_float2 line0s, vector_float2 line0e, const
     _polygonVerticesData[_totalVerticesCount] = _cursor;
     
     [self validateGeometry];
-    _addButton.enabled = _isCurrentLineValid;
-    _finishButton.enabled = _isCloseLineValid;
 }
 
 -(IBAction) onAddButtonClicked:(id)sender {
@@ -357,13 +359,42 @@ bool isLinesIntersectWithLines(vector_float2 line0s, vector_float2 line0e, const
             }
             
             [self validateGeometry];
-            _addButton.enabled = _isCurrentLineValid;
-            _finishButton.enabled = _isCloseLineValid;
         }
             break;
             
         default:
             break;
+    }
+}
+
+-(void) triangulate {
+    //            triangulate_polygon(<#int#>, <#int *#>, <#double (*)[2]#>, <#int (*)[3]#>)
+    if (_polygonSizes.count == 0) return;
+    NSInteger verticesCount = [_polygonSizes[0] integerValue];
+    float leftMostX = _polygonVerticesData[0].x;
+    NSInteger leftMostIndex = 0;
+    for (NSInteger i=1; i<verticesCount; ++i)
+    {
+        if (_polygonVerticesData[i].x < leftMostX)
+        {
+            leftMostX = _polygonVerticesData[i].x;
+            leftMostIndex = i;
+        }
+    }
+    vector_float2 vAnchor = _polygonVerticesData[leftMostIndex];
+    vector_float2 v0 = leftMostIndex > 0 ? _polygonVerticesData[leftMostIndex - 1] : _polygonVerticesData[verticesCount - 1];
+    vector_float2 v1 = leftMostIndex < verticesCount - 1 ? _polygonVerticesData[leftMostIndex + 1] : _polygonVerticesData[0];
+    // Cross Product : Z = X1 * Y2 - X2 * Y1
+    float x0 = vAnchor.x - v0.x, x1 = v1.x - vAnchor.x;
+    float y0 = vAnchor.y - v0.y, y1 = v1.y - vAnchor.y;
+    float crossProductZ = x0 * y1 - x1 * y0;
+    if (crossProductZ > 0)
+    {//CCW
+        
+    }
+    else
+    {//CW
+        
     }
 }
 
@@ -379,8 +410,9 @@ bool isLinesIntersectWithLines(vector_float2 line0s, vector_float2 line0e, const
             
             [self updateEndLineIndicesBuffer];
             [self validateGeometry];
-            _addButton.enabled = _isCurrentLineValid;
-            _finishButton.enabled = _isCloseLineValid;
+            
+            //For Test:
+            _stage = 1;
         }
             break;
             
