@@ -147,32 +147,46 @@ bool isLinesIntersectWithLines(vector_float2 line0s, vector_float2 line0e, const
 @property (nonatomic, assign) NSUInteger totalVerticesCount;
 @property (nonatomic, strong) NSMutableArray<NSNumber* >* polygonSizes;
 
+@property (nonatomic, assign) bool isCurrentLineValid;
+@property (nonatomic, assign) bool isCloseLineValid;
+
+@property (nonatomic, strong) id<MTLBuffer> endLineIndicesBuffer;
 
 @end
 
 @implementation ViewController
 
-- (void)mtkView:(nonnull MTKView *)view drawableSizeWillChange:(CGSize)size {
-    NSLog(@"mtkView:drawableSizeWillChange:");
-}
-
-- (void)drawInMTKView:(nonnull MTKView *)view {
-//    NSLog(@"drawInMTKView:");
-    id<MTLCommandBuffer> commandBuffer = [_mtCommandQueue commandBuffer];
-    [commandBuffer enqueue];
-    
-    bool isCurrentLineValid = true, isCloseLineValid = true;
-    uint32_t* endLineIndices = NULL;
-    int vertexIndex = 0;
+-(void) updateEndLineIndicesBuffer {
     if (_polygonSizes.count > 0)
     {
-        endLineIndices = (uint32_t*) malloc(sizeof(uint32_t) * 2 * _polygonSizes.count);
+        uint32_t* endLineIndices = (uint32_t*) malloc(sizeof(uint32_t) * 2 * _polygonSizes.count);
+        int vertexIndex = 0;
         uint32_t* pEndLineIndices = endLineIndices;
         for (NSNumber* polygonSize in _polygonSizes)
         {
             uint32_t verticesCount = (uint32_t)[polygonSize integerValue];
             *pEndLineIndices++ = vertexIndex;
             *pEndLineIndices++ = vertexIndex + verticesCount - 1;
+            vertexIndex += verticesCount;
+        }
+        _endLineIndicesBuffer = [_mtView.device newBufferWithBytes:endLineIndices length:(sizeof(uint32_t) * 2 * _polygonSizes.count) options:MTLResourceOptionCPUCacheModeDefault];
+        free(endLineIndices);
+    }
+    else
+    {
+        _endLineIndicesBuffer = nil;
+    }
+}
+
+-(void) validateGeometry {
+    _isCurrentLineValid = true;
+    _isCloseLineValid = true;
+    int vertexIndex = 0;
+    if (_polygonSizes.count > 0)
+    {
+        for (NSNumber* polygonSize in _polygonSizes)
+        {
+            uint32_t verticesCount = (uint32_t)[polygonSize integerValue];
             vertexIndex += verticesCount;
         }
     }
@@ -184,71 +198,74 @@ bool isLinesIntersectWithLines(vector_float2 line0s, vector_float2 line0e, const
         for (NSNumber* polygonSize in _polygonSizes)
         {
             uint32_t verticesCount = (uint32_t)[polygonSize integerValue];
-            if (isCurrentLineValid)
+            if (_isCurrentLineValid)
             {
                 if (isLinesIntersectWithLineStrip(currentLine[0], currentLine[1], _polygonVerticesData + vertexIndex, verticesCount - 1))
                 {
-                    isCurrentLineValid = false;
+                    _isCurrentLineValid = false;
                 }
             }
-            if (isCloseLineValid)
+            if (_isCloseLineValid)
             {
                 if (isLinesIntersectWithLineStrip(closeLine[0], closeLine[1], _polygonVerticesData + vertexIndex, verticesCount - 1))
                 {
-                    isCloseLineValid = false;
+                    _isCloseLineValid = false;
                 }
             }
             vertexIndex += verticesCount;
         }
         
-        if (isCurrentLineValid)
+        uint32_t* endLineIndices = (uint32_t*)_endLineIndicesBuffer.contents;
+        if (_isCurrentLineValid)
         {
             if (isLinesIntersectWithLines(currentLine[0], currentLine[1], _polygonVerticesData, endLineIndices, _polygonSizes.count))
             {
-                isCurrentLineValid = false;
+                _isCurrentLineValid = false;
             }
         }
-        if (isCloseLineValid)
+        if (_isCloseLineValid)
         {
             if (isLinesIntersectWithLines(closeLine[0], closeLine[1], _polygonVerticesData, endLineIndices, _polygonSizes.count))
             {
-                isCloseLineValid = false;
+                _isCloseLineValid = false;
             }
         }
-        
+            
         if (_currentPolygonVerticesCount > 2)
         {
-            if (isCurrentLineValid)
+            if (_isCurrentLineValid)
             {
                 if (isLinesIntersectWithLineStrip(currentLine[0], currentLine[1], _polygonVerticesData + vertexIndex, _currentPolygonVerticesCount - 2))
                 {
-                    isCurrentLineValid = false;
+                    _isCurrentLineValid = false;
                 }
             }
-            if (isCloseLineValid)
+            if (_isCloseLineValid)
             {
                 if (isLinesIntersectWithLineStrip(closeLine[0], closeLine[1], _polygonVerticesData + vertexIndex + 1, _currentPolygonVerticesCount - 2))
                 {
-                    isCloseLineValid = false;
+                    _isCloseLineValid = false;
                 }
             }
         }
-        
-        if (!isCurrentLineValid || !isCloseLineValid)
-        {
-            _mtView.clearColor = MTLClearColorMake(1, 0, 0, 1);
-        }
-        else
-        {
-            _mtView.clearColor = MTLClearColorMake(0, 0, 0, 1);
-        }
     }
+}
+
+- (void)mtkView:(nonnull MTKView *)view drawableSizeWillChange:(CGSize)size {
+    NSLog(@"mtkView:drawableSizeWillChange:");
+}
+
+- (void)drawInMTKView:(nonnull MTKView *)view {
+//    NSLog(@"drawInMTKView:");
+    id<MTLCommandBuffer> commandBuffer = [_mtCommandQueue commandBuffer];
+    [commandBuffer enqueue];
+    
+    if (!_isCurrentLineValid)
+        _mtView.clearColor = MTLClearColorMake(1, 0, 0, 1);
+    else if (!_isCloseLineValid)
+        _mtView.clearColor = MTLClearColorMake(0.75, 0.75, 0.5, 1);
     else
-    {
         _mtView.clearColor = MTLClearColorMake(0, 0, 0, 1);
-    }
-    _addButton.enabled = isCurrentLineValid;
-    _finishButton.enabled = isCloseLineValid;
     
     id<MTLRenderCommandEncoder> renderEncoder = [commandBuffer renderCommandEncoderWithDescriptor:view.currentRenderPassDescriptor];
     [renderEncoder setRenderPipelineState:_primitiveRenderPipeline];
@@ -281,7 +298,7 @@ bool isLinesIntersectWithLines(vector_float2 line0s, vector_float2 line0e, const
 
     [renderEncoder setVertexBytes:_polygonVerticesData length:sizeof(vector_float2) * (_totalVerticesCount + 1) atIndex:VertexSlot];
     [renderEncoder setFragmentBytes:&greenColor length:sizeof(vector_float4) atIndex:ColorSlot];
-    vertexIndex = 0;
+    int vertexIndex = 0;
     if (_polygonSizes.count > 0)
     {// Draw completed polygons:
         
@@ -292,14 +309,13 @@ bool isLinesIntersectWithLines(vector_float2 line0s, vector_float2 line0e, const
             vertexIndex += verticesCount;
         }
         // Draw the 'last' lines:
-        id<MTLBuffer> indices = [view.device newBufferWithBytes:endLineIndices length:(sizeof(uint32_t) * 2 * _polygonSizes.count) options:MTLResourceOptionCPUCacheModeDefault];
-        free(endLineIndices);
-        [renderEncoder drawIndexedPrimitives:MTLPrimitiveTypeLine indexCount:(2 * _polygonSizes.count) indexType:MTLIndexTypeUInt32 indexBuffer:indices indexBufferOffset:0];
+        
+        [renderEncoder drawIndexedPrimitives:MTLPrimitiveTypeLine indexCount:(2 * _polygonSizes.count) indexType:MTLIndexTypeUInt32 indexBuffer:_endLineIndicesBuffer indexBufferOffset:0];
     }
     if (_currentPolygonVerticesCount > 0)
     {// Draw the incompleted(editing) polygon:
         [renderEncoder drawPrimitives:MTLPrimitiveTypeLineStrip vertexStart:vertexIndex vertexCount:_currentPolygonVerticesCount + 1 instanceCount:1];
-        if (_currentPolygonVerticesCount > 2)
+        if (_currentPolygonVerticesCount > 1)
         {
             [renderEncoder setFragmentBytes:&whiteColor length:sizeof(vector_float4) atIndex:ColorSlot];
             vector_float2 line[] = {_polygonVerticesData[vertexIndex], _polygonVerticesData[vertexIndex + _currentPolygonVerticesCount]};
@@ -319,6 +335,10 @@ bool isLinesIntersectWithLines(vector_float2 line0s, vector_float2 line0e, const
     CGPoint touchPoint = [recognizer locationInView:recognizer.view];
     _cursor = (vector_float2){(touchPoint.x / recognizer.view.bounds.size.width - 0.5f) * 2.f, (0.5f - touchPoint.y / recognizer.view.bounds.size.height) * 2.f};
     _polygonVerticesData[_totalVerticesCount] = _cursor;
+    
+    [self validateGeometry];
+    _addButton.enabled = _isCurrentLineValid;
+    _finishButton.enabled = _isCloseLineValid;
 }
 
 -(IBAction) onAddButtonClicked:(id)sender {
@@ -335,6 +355,10 @@ bool isLinesIntersectWithLines(vector_float2 line0s, vector_float2 line0e, const
             {
                 _addButton.enabled = NO;
             }
+            
+            [self validateGeometry];
+            _addButton.enabled = _isCurrentLineValid;
+            _finishButton.enabled = _isCloseLineValid;
         }
             break;
             
@@ -352,6 +376,11 @@ bool isLinesIntersectWithLines(vector_float2 line0s, vector_float2 line0e, const
             [_polygonSizes addObject:@(_currentPolygonVerticesCount + 1)];
             _currentPolygonVerticesCount = 0;
             _finishButton.enabled = NO;
+            
+            [self updateEndLineIndicesBuffer];
+            [self validateGeometry];
+            _addButton.enabled = _isCurrentLineValid;
+            _finishButton.enabled = _isCloseLineValid;
         }
             break;
             
@@ -391,6 +420,8 @@ bool isLinesIntersectWithLines(vector_float2 line0s, vector_float2 line0e, const
     _currentPolygonVerticesCount = 0;
     _totalVerticesCount = 0;
     _polygonVerticesData = (vector_float2*) malloc(sizeof(vector_float2) * _maxVerticesCount);
+    _isCurrentLineValid = true;
+    _isCloseLineValid = true;
     
     UIPanGestureRecognizer* panRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(onPanGestureRecognized:)];
     [_mtView addGestureRecognizer:panRecognizer];
