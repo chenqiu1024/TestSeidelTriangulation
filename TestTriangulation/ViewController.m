@@ -50,7 +50,9 @@ bool areLinesIntersect(vector_float2 line0s, vector_float2 line0e, vector_float2
                 minX1 = line1s.x;
             }
             if (maxX0 < minX1 || maxX1 < minX0)
+            {// On the same line but apart
                 return false;
+            }
             
             float maxY0, minY0, maxY1, minY1;
             if (line0s.y > line0e.y)
@@ -74,12 +76,14 @@ bool areLinesIntersect(vector_float2 line0s, vector_float2 line0e, vector_float2
                 minY1 = line1s.y;
             }
             if (maxY0 < minY1 || maxY1 < minY0)
+            {// On the same line but apart}
                 return false;
+            }
             
             return true;
         }
         else
-        {// Parallel and Apart
+        {// Parallel and Not on the same line
             return false;
         }
     }
@@ -98,6 +102,26 @@ bool areLinesIntersect(vector_float2 line0s, vector_float2 line0e, vector_float2
         
         return false;
     }
+}
+
+bool isLinesIntersectWithLineStrip(vector_float2 line0s, vector_float2 line0e, const vector_float2* lines, size_t linesCount) {
+    const vector_float2* pPoint0 = lines;
+    for (int i=linesCount; i>0; --i)
+    {
+        if (areLinesIntersect(line0s, line0e, pPoint0[0], pPoint0[1])) return true;
+        pPoint0++;
+    }
+    return false;
+}
+
+bool isLinesIntersectWithLines(vector_float2 line0s, vector_float2 line0e, const vector_float2* points, const uint32_t* indices, size_t linesCount) {
+    const uint32_t* pIndex = indices;
+    for (int i=linesCount; i>0; --i)
+    {
+        if (areLinesIntersect(line0s, line0e, points[pIndex[0]], points[pIndex[1]])) return true;
+        pIndex += 2;
+    }
+    return false;
 }
 
 @interface ViewController () <MTKViewDelegate>
@@ -137,8 +161,94 @@ bool areLinesIntersect(vector_float2 line0s, vector_float2 line0e, vector_float2
     id<MTLCommandBuffer> commandBuffer = [_mtCommandQueue commandBuffer];
     [commandBuffer enqueue];
     
-    _mtView.currentRenderPassDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(1, 1, 1, 1);
-    _mtView.clearColor = MTLClearColorMake(0, 0, 0, 1);
+    bool isCurrentLineValid = true, isCloseLineValid = true;
+    uint32_t* endLineIndices = NULL;
+    int vertexIndex = 0;
+    if (_polygonSizes.count > 0)
+    {
+        endLineIndices = (uint32_t*) malloc(sizeof(uint32_t) * 2 * _polygonSizes.count);
+        uint32_t* pEndLineIndices = endLineIndices;
+        for (NSNumber* polygonSize in _polygonSizes)
+        {
+            uint32_t verticesCount = (uint32_t)[polygonSize integerValue];
+            *pEndLineIndices++ = vertexIndex;
+            *pEndLineIndices++ = vertexIndex + verticesCount - 1;
+            vertexIndex += verticesCount;
+        }
+    }
+    if (_currentPolygonVerticesCount > 0)
+    {
+        vector_float2 currentLine[] = {_polygonVerticesData[vertexIndex + _currentPolygonVerticesCount - 1], _polygonVerticesData[vertexIndex + _currentPolygonVerticesCount]};
+        vector_float2 closeLine[] = {_polygonVerticesData[vertexIndex], _polygonVerticesData[vertexIndex + _currentPolygonVerticesCount]};
+        vertexIndex = 0;
+        for (NSNumber* polygonSize in _polygonSizes)
+        {
+            uint32_t verticesCount = (uint32_t)[polygonSize integerValue];
+            if (isCurrentLineValid)
+            {
+                if (isLinesIntersectWithLineStrip(currentLine[0], currentLine[1], _polygonVerticesData + vertexIndex, verticesCount - 1))
+                {
+                    isCurrentLineValid = false;
+                }
+            }
+            if (isCloseLineValid)
+            {
+                if (isLinesIntersectWithLineStrip(closeLine[0], closeLine[1], _polygonVerticesData + vertexIndex, verticesCount - 1))
+                {
+                    isCloseLineValid = false;
+                }
+            }
+            vertexIndex += verticesCount;
+        }
+        
+        if (isCurrentLineValid)
+        {
+            if (isLinesIntersectWithLines(currentLine[0], currentLine[1], _polygonVerticesData, endLineIndices, _polygonSizes.count))
+            {
+                isCurrentLineValid = false;
+            }
+        }
+        if (isCloseLineValid)
+        {
+            if (isLinesIntersectWithLines(closeLine[0], closeLine[1], _polygonVerticesData, endLineIndices, _polygonSizes.count))
+            {
+                isCloseLineValid = false;
+            }
+        }
+        
+        if (_currentPolygonVerticesCount > 2)
+        {
+            if (isCurrentLineValid)
+            {
+                if (isLinesIntersectWithLineStrip(currentLine[0], currentLine[1], _polygonVerticesData + vertexIndex, _currentPolygonVerticesCount - 2))
+                {
+                    isCurrentLineValid = false;
+                }
+            }
+            if (isCloseLineValid)
+            {
+                if (isLinesIntersectWithLineStrip(closeLine[0], closeLine[1], _polygonVerticesData + vertexIndex + 1, _currentPolygonVerticesCount - 2))
+                {
+                    isCloseLineValid = false;
+                }
+            }
+        }
+        
+        if (!isCurrentLineValid || !isCloseLineValid)
+        {
+            _mtView.clearColor = MTLClearColorMake(1, 0, 0, 1);
+        }
+        else
+        {
+            _mtView.clearColor = MTLClearColorMake(0, 0, 0, 1);
+        }
+    }
+    else
+    {
+        _mtView.clearColor = MTLClearColorMake(0, 0, 0, 1);
+    }
+    _addButton.enabled = isCurrentLineValid;
+    _finishButton.enabled = isCloseLineValid;
     
     id<MTLRenderCommandEncoder> renderEncoder = [commandBuffer renderCommandEncoderWithDescriptor:view.currentRenderPassDescriptor];
     [renderEncoder setRenderPipelineState:_primitiveRenderPipeline];
@@ -171,25 +281,23 @@ bool areLinesIntersect(vector_float2 line0s, vector_float2 line0e, vector_float2
 
     [renderEncoder setVertexBytes:_polygonVerticesData length:sizeof(vector_float2) * (_totalVerticesCount + 1) atIndex:VertexSlot];
     [renderEncoder setFragmentBytes:&greenColor length:sizeof(vector_float4) atIndex:ColorSlot];
-    int vertexIndex = 0;
+    vertexIndex = 0;
     if (_polygonSizes.count > 0)
-    {
-        uint32_t* endLineIndices = (uint32_t*) malloc(sizeof(uint32_t) * 2 * _polygonSizes.count);
-        uint32_t* pEndLineIndices = endLineIndices;
+    {// Draw completed polygons:
+        
         for (NSNumber* polygonSize in _polygonSizes)
-        {
+        {// Draw lines of each polygon except the last line(from 0 to N-1):
             uint32_t verticesCount = (uint32_t)[polygonSize integerValue];
             [renderEncoder drawPrimitives:MTLPrimitiveTypeLineStrip vertexStart:vertexIndex vertexCount:verticesCount instanceCount:1];
-            *pEndLineIndices++ = vertexIndex;
-            *pEndLineIndices++ = vertexIndex + verticesCount - 1;
             vertexIndex += verticesCount;
         }
+        // Draw the 'last' lines:
         id<MTLBuffer> indices = [view.device newBufferWithBytes:endLineIndices length:(sizeof(uint32_t) * 2 * _polygonSizes.count) options:MTLResourceOptionCPUCacheModeDefault];
         free(endLineIndices);
         [renderEncoder drawIndexedPrimitives:MTLPrimitiveTypeLine indexCount:(2 * _polygonSizes.count) indexType:MTLIndexTypeUInt32 indexBuffer:indices indexBufferOffset:0];
     }
     if (_currentPolygonVerticesCount > 0)
-    {
+    {// Draw the incompleted(editing) polygon:
         [renderEncoder drawPrimitives:MTLPrimitiveTypeLineStrip vertexStart:vertexIndex vertexCount:_currentPolygonVerticesCount + 1 instanceCount:1];
         if (_currentPolygonVerticesCount > 2)
         {
