@@ -9,6 +9,96 @@
 #import "ViewController.h"
 #import "ShaderDefines.h"
 #import <MetalKit/MetalKit.h>
+#import <simd/simd.h>
+
+bool areLinesIntersect(vector_float2 line0s, vector_float2 line0e, vector_float2 line1s, vector_float2 line1e) {
+    const float Epsilon = 0.0000000000001;
+    const float A0 = line0e.y - line0s.y;
+    const float B0 = line0s.x - line0e.x;
+    const float C0 = line0e.x * line0s.y - line0s.x * line0e.y;
+    
+    const float A1 = line1e.y - line1s.y;
+    const float B1 = line1s.x - line1e.x;
+    const float C1 = line1e.x * line1s.y - line1s.x * line1e.y;
+    
+    const float D = A0 * B1 - A1 * B0;
+    const float E = B1 * C0 - B0 * C1;
+    const float F = A0 * C1 - A1 * C0;
+    if (fabsf(D) <= Epsilon)
+    {// Parallel
+        if (fabsf(E) <= Epsilon && fabsf(F) <= Epsilon)
+        {// On the same line
+            float maxX0, minX0, maxX1, minX1;
+            if (line0s.x > line0e.x)
+            {
+                maxX0 = line0s.x;
+                minX0 = line0e.x;
+            }
+            else
+            {
+                maxX0 = line0e.x;
+                minX0 = line0s.x;
+            }
+            if (line1s.x > line1e.x)
+            {
+                maxX1 = line1s.x;
+                minX1 = line1e.x;
+            }
+            else
+            {
+                maxX1 = line1e.x;
+                minX1 = line1s.x;
+            }
+            if (maxX0 < minX1 || maxX1 < minX0)
+                return false;
+            
+            float maxY0, minY0, maxY1, minY1;
+            if (line0s.y > line0e.y)
+            {
+                maxY0 = line0s.y;
+                minY0 = line0e.y;
+            }
+            else
+            {
+                maxY0 = line0e.y;
+                minY0 = line0s.y;
+            }
+            if (line1s.y > line1e.y)
+            {
+                maxY1 = line1s.y;
+                minY1 = line1e.y;
+            }
+            else
+            {
+                maxY1 = line1e.y;
+                minY1 = line1s.y;
+            }
+            if (maxY0 < minY1 || maxY1 < minY0)
+                return false;
+            
+            return true;
+        }
+        else
+        {// Parallel and Apart
+            return false;
+        }
+    }
+    else
+    {
+        vector_float2 intersection = (vector_float2){E/D, F/D};
+        float signX0 = (intersection.x - line0s.x) * (intersection.x - line0e.x);
+        float signX1 = (intersection.x - line1s.x) * (intersection.x - line1e.x);
+        if (signX0 <= 0 && signX1 <= 0)
+            return true;
+        
+        float signY0 = (intersection.y - line0s.y) * (intersection.y - line0e.y);
+        float signY1 = (intersection.y - line1s.y) * (intersection.y - line1e.y);
+        if (signY0 <= 0 && signY1 <= 0)
+            return true;
+        
+        return false;
+    }
+}
 
 @interface ViewController () <MTKViewDelegate>
 
