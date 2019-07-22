@@ -329,8 +329,8 @@ bool isLinesIntersectWithLines(vector_float2 line0s, vector_float2 line0e, const
             _polygonVerticesData[_totalVerticesCount++] = _cursor;
             _polygonVerticesData[_totalVerticesCount] = _cursor;
             _currentPolygonVerticesCount++;
-            _finishButton.enabled = (_currentPolygonVerticesCount > 2);
-            _finishButton.hidden = !(_currentPolygonVerticesCount > 2);
+            _finishButton.enabled = (_currentPolygonVerticesCount > 1);
+            _finishButton.hidden = !(_currentPolygonVerticesCount > 1);
             if (_totalVerticesCount == _maxVerticesCount)
             {
                 _addButton.enabled = NO;
@@ -348,7 +348,8 @@ bool isLinesIntersectWithLines(vector_float2 line0s, vector_float2 line0e, const
     {
         case 0:
         {
-            [_polygonSizes addObject:@(_currentPolygonVerticesCount)];
+            _totalVerticesCount++;
+            [_polygonSizes addObject:@(_currentPolygonVerticesCount + 1)];
             _currentPolygonVerticesCount = 0;
             _finishButton.enabled = NO;
         }
