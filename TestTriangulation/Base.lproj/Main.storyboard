@@ -25,21 +25,6 @@
                                     <action selector="onAddButtonClicked:" destination="BYZ-38-t0r" eventType="touchUpInside" id="lak-jT-RuW"/>
                                 </connections>
                             </button>
-                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kxZ-l4-diU">
-                                <rect key="frame" x="250" y="433" width="62" height="30"/>
-                                <state key="normal" title="完结轮廓"/>
-                                <connections>
-                                    <action selector="onFinishButtonClicked:" destination="BYZ-38-t0r" eventType="touchUpInside" id="eTO-eU-t3d"/>
-                                </connections>
-                            </button>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Nhu-Or-RVG">
-                                <rect key="frame" x="201.5" y="403" width="11.5" height="22"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <nil key="highlightedColor"/>
-                                <color key="shadowColor" white="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <size key="shadowOffset" width="1" height="1"/>
-                            </label>
                             <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kgG-kK-U0p">
                                 <rect key="frame" x="184" y="471" width="46" height="30"/>
                                 <state key="normal" title="三角化"/>
@@ -48,22 +33,53 @@
                                     <action selector="onTriangulateButtonClicked:" destination="BYZ-38-t0r" eventType="touchUpInside" id="mW8-Iw-ZqU"/>
                                 </connections>
                             </button>
+                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kxZ-l4-diU">
+                                <rect key="frame" x="250" y="433" width="62" height="30"/>
+                                <state key="normal" title="完结轮廓"/>
+                                <connections>
+                                    <action selector="onFinishButtonClicked:" destination="BYZ-38-t0r" eventType="touchUpInside" id="eTO-eU-t3d"/>
+                                </connections>
+                            </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="填充" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gH9-S6-t24">
+                                <rect key="frame" x="237.5" y="511.5" width="36" height="22"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <nil key="highlightedColor"/>
+                                <color key="shadowColor" white="0.66666666669999997" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <size key="shadowOffset" width="1" height="1"/>
+                            </label>
+                            <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Xka-23-PfG">
+                                <rect key="frame" x="182.5" y="507" width="51" height="31"/>
+                            </switch>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Nhu-Or-RVG">
+                                <rect key="frame" x="201.5" y="44" width="11.5" height="21.5"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <nil key="highlightedColor"/>
+                                <color key="shadowColor" white="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <size key="shadowOffset" width="1" height="1"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="kgG-kK-U0p" firstAttribute="top" secondItem="2OL-Uf-tNa" secondAttribute="bottom" constant="8" id="7Jk-cV-rCH"/>
                             <constraint firstItem="2OL-Uf-tNa" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="Ak9-vD-ovQ"/>
+                            <constraint firstItem="Xka-23-PfG" firstAttribute="centerX" secondItem="kgG-kK-U0p" secondAttribute="centerX" id="BmR-NE-a0A"/>
                             <constraint firstItem="2OL-Uf-tNa" firstAttribute="centerX" secondItem="Nhu-Or-RVG" secondAttribute="centerX" id="IK2-Q8-k6I"/>
+                            <constraint firstItem="gH9-S6-t24" firstAttribute="leading" secondItem="Xka-23-PfG" secondAttribute="trailing" constant="6" id="PBX-o2-LOx"/>
                             <constraint firstItem="kgG-kK-U0p" firstAttribute="centerX" secondItem="2OL-Uf-tNa" secondAttribute="centerX" id="WK7-PB-uUf"/>
                             <constraint firstItem="2OL-Uf-tNa" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="WUz-wC-rgP"/>
                             <constraint firstItem="kxZ-l4-diU" firstAttribute="centerY" secondItem="2OL-Uf-tNa" secondAttribute="centerY" id="WnF-wb-l85"/>
-                            <constraint firstItem="2OL-Uf-tNa" firstAttribute="top" secondItem="Nhu-Or-RVG" secondAttribute="bottom" constant="8" id="mGP-Hx-dV9"/>
+                            <constraint firstItem="Nhu-Or-RVG" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="dun-a8-YFy"/>
+                            <constraint firstItem="Xka-23-PfG" firstAttribute="top" secondItem="kgG-kK-U0p" secondAttribute="bottom" constant="6" id="hCe-RW-dlL"/>
                             <constraint firstItem="kxZ-l4-diU" firstAttribute="leading" secondItem="2OL-Uf-tNa" secondAttribute="trailing" constant="12" id="yFz-f7-P4r"/>
+                            <constraint firstItem="gH9-S6-t24" firstAttribute="centerY" secondItem="Xka-23-PfG" secondAttribute="centerY" id="yfy-WI-qFN"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
                     <connections>
                         <outlet property="addButton" destination="2OL-Uf-tNa" id="j8c-L2-Rzg"/>
+                        <outlet property="fillSwitch" destination="Xka-23-PfG" id="XtP-1j-QFY"/>
                         <outlet property="finishButton" destination="kxZ-l4-diU" id="EAF-9R-U7L"/>
                         <outlet property="infoLabel" destination="Nhu-Or-RVG" id="xlU-z7-wsJ"/>
                         <outlet property="triangulateButton" destination="kgG-kK-U0p" id="mol-Yl-uAp"/>
@@ -71,6 +87,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
+            <point key="canvasLocation" x="131.8840579710145" y="121.875"/>
         </scene>
     </scenes>
 </document>

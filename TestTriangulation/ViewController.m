@@ -185,6 +185,7 @@ bool isPolygonClockwise(const vector_float2* vertices, size_t verticesCount) {
 @property (nonatomic, strong) IBOutlet UIButton* finishButton;
 @property (nonatomic, strong) IBOutlet UIButton* triangulateButton;
 @property (nonatomic, strong) IBOutlet UILabel* infoLabel;
+@property (nonatomic, strong) IBOutlet UISwitch* fillSwitch;
 
 -(IBAction) onAddButtonClicked:(id)sender;
 -(IBAction) onFinishButtonClicked:(id)sender;
@@ -204,7 +205,8 @@ bool isPolygonClockwise(const vector_float2* vertices, size_t verticesCount) {
 @property (nonatomic, assign) bool isCloseLineValid;
 
 @property (nonatomic, strong) id<MTLBuffer> endLineIndicesBuffer;
-@property (nonatomic, strong) id<MTLBuffer> triangleIndicesBuffer;
+@property (nonatomic, strong) id<MTLBuffer> triangleLinesIndicesBuffer;
+@property (nonatomic, strong) id<MTLBuffer> trianglesIndicesBuffer;
 
 @end
 
@@ -410,14 +412,21 @@ bool isPolygonClockwise(const vector_float2* vertices, size_t verticesCount) {
             }
         }
     }
-    else if (1 == _stage && _triangleIndicesBuffer)
+    else if (1 == _stage && _triangleLinesIndicesBuffer)
     {
         // The number of output triangles produced for a polygon with n points is, (n - 2) + 2*(#holes)
         size_t totalPolygonVertices = _totalVerticesCount - _currentPolygonVerticesCount;
         size_t trianglesCount = totalPolygonVertices - 2 + 2 * (_polygonSizes.count - 1);
         [renderEncoder setVertexBytes:_polygonVerticesData length:sizeof(vector_float2) * totalPolygonVertices atIndex:VertexSlot];
         [renderEncoder setFragmentBytes:&greenColor length:sizeof(vector_float4) atIndex:ColorSlot];
-        [renderEncoder drawIndexedPrimitives:MTLPrimitiveTypeLine indexCount:(6 * trianglesCount) indexType:MTLIndexTypeUInt32 indexBuffer:_triangleIndicesBuffer indexBufferOffset:0];
+        if (_fillSwitch.isOn)
+        {
+            [renderEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle indexCount:(3 * trianglesCount) indexType:MTLIndexTypeUInt32 indexBuffer:_trianglesIndicesBuffer indexBufferOffset:0];
+        }
+        else
+        {
+            [renderEncoder drawIndexedPrimitives:MTLPrimitiveTypeLine indexCount:(6 * trianglesCount) indexType:MTLIndexTypeUInt32 indexBuffer:_triangleLinesIndicesBuffer indexBufferOffset:0];
+        }
     }
     
     [renderEncoder endEncoding];
@@ -509,24 +518,32 @@ bool isPolygonClockwise(const vector_float2* vertices, size_t verticesCount) {
     triangulate_polygon((int)_polygonSizes.count, polygonSizes, (double(*)[2])vertices, (int(*)[3])triangles);
     
     uint32_t* triangleLinesIndices = (uint32_t*) malloc(sizeof(uint32_t) * 6 * trianglesCount);
+    uint32_t* trianglesIndices = (uint32_t*) malloc(sizeof(uint32_t) * 3 * trianglesCount);
     uint32_t* pTriangleLines = triangleLinesIndices;
-    int* pTriangles = triangles;
+    uint32_t* pDstTriangles = trianglesIndices;
+    int* pSrcTriangles = triangles;
     for (int i=0; i<trianglesCount; ++i)
     {
-        uint32_t v0 = (uint32_t) reorderedIndices[pTriangles[0] - 1];
-        uint32_t v1 = (uint32_t) reorderedIndices[pTriangles[1] - 1];
-        uint32_t v2 = (uint32_t) reorderedIndices[pTriangles[2] - 1];
+        uint32_t v0 = (uint32_t) reorderedIndices[pSrcTriangles[0] - 1];
+        uint32_t v1 = (uint32_t) reorderedIndices[pSrcTriangles[1] - 1];
+        uint32_t v2 = (uint32_t) reorderedIndices[pSrcTriangles[2] - 1];
         pTriangleLines[0] = v0;
         pTriangleLines[1] = v1;
         pTriangleLines[2] = v1;
         pTriangleLines[3] = v2;
         pTriangleLines[4] = v2;
         pTriangleLines[5] = v0;
-        pTriangles += 3;
+        pDstTriangles[0] = v0;
+        pDstTriangles[1] = v1;
+        pDstTriangles[2] = v2;
+        pSrcTriangles += 3;
         pTriangleLines += 6;
+        pDstTriangles += 3;
     }
-    _triangleIndicesBuffer = [_mtView.device newBufferWithBytes:triangleLinesIndices length:(sizeof(uint32_t) * 6 * trianglesCount) options:MTLResourceOptionCPUCacheModeDefault];
+    _triangleLinesIndicesBuffer = [_mtView.device newBufferWithBytes:triangleLinesIndices length:(sizeof(uint32_t) * 6 * trianglesCount) options:MTLResourceOptionCPUCacheModeDefault];
+    _trianglesIndicesBuffer = [_mtView.device newBufferWithBytes:trianglesIndices length:(sizeof(uint32_t) * 3 * trianglesCount) options:MTLResourceOptionCPUCacheModeDefault];
     free(triangleLinesIndices);
+    free(trianglesIndices);
     
     free(polygonSizes);
     free(vertices);
