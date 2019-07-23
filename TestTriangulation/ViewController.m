@@ -8,7 +8,7 @@
 
 #import "ViewController.h"
 #import "ShaderDefines.h"
-#import "interface.h"
+#import "triangulation_seidel.h"
 #import <MetalKit/MetalKit.h>
 #import <simd/simd.h>
 
@@ -617,8 +617,8 @@ bool isPolygonClockwise(const vector_float2* vertices, size_t verticesCount) {
     NSTimeInterval timeUsage = [[NSDate date] timeIntervalSinceDate:startTime];
     dispatch_async(dispatch_get_main_queue(), ^{
         self.profileLabel.text = [NSString stringWithFormat:@"%ld vertices, %ld holes, total %f ms for %d times, average %f ms for one triangulation", totalPolygonVertices, self.polygonSizes.count - 1, timeUsage * 1000, TestCount, timeUsage * 1000 / TestCount];
-        self.stage = 0;
-        [self setControlStates];
+        _profileButton.enabled = YES;
+        //[self setControlStates];
     });
     
     free(polygonSizes);
@@ -628,13 +628,12 @@ bool isPolygonClockwise(const vector_float2* vertices, size_t verticesCount) {
 }
 
 -(IBAction) onProfileButtonClicked:(id)sender {
-    _stage = 2;
     _profileButton.enabled = NO;
     _profileLabel.text = @"Profiling...";
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         [self profileTriangulation];
     });
-    [self setControlStates];
+    //[self setControlStates];
 }
 
 -(IBAction) onFinishButtonClicked:(id)sender {

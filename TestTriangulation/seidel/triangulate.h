@@ -71,6 +71,7 @@ typedef struct {
 #define TRSIZE  4*SEGSIZE    /* max# trapezoids */
 
 //#define FIX_SIZED_ARRAY
+//#define GLOBAL_TRIANGULATOR
 
 typedef struct {
     int qSize;
@@ -127,6 +128,10 @@ typedef struct {
     int chain_idx, op_idx, mon_idx;
     
 } SeidelTriangulator;
+
+#ifdef GLOBAL_TRIANGULATOR
+extern SeidelTriangulator g_seidel;
+#endif
 
 /* Node types */
 

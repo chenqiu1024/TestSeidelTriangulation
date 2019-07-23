@@ -2,6 +2,10 @@
 #include <sys/time.h>
 #include <string.h>
 
+#ifdef GLOBAL_TRIANGULATOR
+SeidelTriangulator g_seidel;
+#endif
+
 static int initialise(SeidelTriangulator* state, int n)
 {
   register int i;
@@ -33,6 +37,13 @@ void SeidelTriangulatorReset(SeidelTriangulator* state) {
 }
 
 SeidelTriangulator* SeidelTriangulatorCreate(int n) {
+#ifdef GLOBAL_TRIANGULATOR
+    g_seidel.segSize = n + 1;
+    g_seidel.qSize = 8 * g_seidel.segSize;
+    g_seidel.trSize = 4 * g_seidel.segSize;
+    SeidelTriangulatorReset(&g_seidel);
+    return &g_seidel;
+#else
     SeidelTriangulator* ret = (SeidelTriangulator*) malloc(sizeof(SeidelTriangulator));
     //*
     ret->segSize = n + 1;
@@ -69,9 +80,11 @@ SeidelTriangulator* SeidelTriangulatorCreate(int n) {
     SeidelTriangulatorReset(ret);
     
     return ret;
+#endif
 }
 
 void SeidelTriangulatorRelease(SeidelTriangulator* state) {
+#ifndef GLOBAL_TRIANGULATOR
     if (!state) return;
 #ifndef FIX_SIZED_ARRAY
     free(state->qs);
@@ -84,6 +97,7 @@ void SeidelTriangulatorRelease(SeidelTriangulator* state) {
     free(state->visited);
 #endif
     free(state);
+#endif
 }
 
 #ifdef STANDALONE
@@ -144,7 +158,7 @@ void triangulate_polygon(SeidelTriangulator** inoutTriangulatorPtr, int ncontour
   register int i;
   int nmonpoly, ccount, npoints, genus;
   int n;
-
+    
     SeidelTriangulator* state = *inoutTriangulatorPtr;
     if (NULL == state)
     {

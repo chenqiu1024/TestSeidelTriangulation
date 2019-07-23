@@ -65,7 +65,7 @@
 		5297B48722E4B5DA00E15BF6 /* misc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = misc.c; sourceTree = "<group>"; };
 		5297B48822E4B5DA00E15BF6 /* tri.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = tri.c; sourceTree = "<group>"; };
 		5297B48922E4B5DA00E15BF6 /* construct.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = construct.c; sourceTree = "<group>"; };
-		5297B48B22E4B5DA00E15BF6 /* interface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = interface.h; sourceTree = "<group>"; };
+		5297B48B22E4B5DA00E15BF6 /* triangulation_seidel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = triangulation_seidel.h; sourceTree = "<group>"; };
 		5297B48C22E4B5DA00E15BF6 /* triangulate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = triangulate.h; sourceTree = "<group>"; };
 		5297B48D22E4B5DA00E15BF6 /* monotone.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = monotone.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -168,7 +168,7 @@
 			isa = PBXGroup;
 			children = (
 				5297B48922E4B5DA00E15BF6 /* construct.c */,
-				5297B48B22E4B5DA00E15BF6 /* interface.h */,
+				5297B48B22E4B5DA00E15BF6 /* triangulation_seidel.h */,
 				5297B48722E4B5DA00E15BF6 /* misc.c */,
 				5297B48D22E4B5DA00E15BF6 /* monotone.c */,
 				5297B48822E4B5DA00E15BF6 /* tri.c */,
