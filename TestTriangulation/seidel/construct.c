@@ -5,7 +5,7 @@
 /* Return a new node to be added into the query tree */
 static int newnode(SeidelTriangulator* state)
 {
-  if (state->q_idx < QSIZE)
+  if (state->q_idx < state->qSize)
     return state->q_idx++;
   else
     {
@@ -17,7 +17,7 @@ static int newnode(SeidelTriangulator* state)
 /* Return a free trapezoid */
 static int newtrap(SeidelTriangulator* state)
 {
-  if (state->tr_idx < TRSIZE)
+  if (state->tr_idx < state->trSize)
     {
       state->tr[state->tr_idx].lseg = -1;
       state->tr[state->tr_idx].rseg = -1;

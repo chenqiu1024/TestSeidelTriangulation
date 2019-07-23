@@ -15,7 +15,8 @@ int generate_random_ordering(SeidelTriangulator* state, int n)
   struct timeval tval;
   struct timezone tzone;
   register int i;
-  int m, st[SEGSIZE], *p;
+  int m, *p;
+  int* st = (int*)malloc(sizeof(int) * state->segSize);
   
   state->choose_idx = 1;
   gettimeofday(&tval, &tzone);
@@ -32,6 +33,7 @@ int generate_random_ordering(SeidelTriangulator* state, int n)
       if (m != 1)
 	p[m] = p[1];
     }
+  free(st);
   return 0;
 }
 

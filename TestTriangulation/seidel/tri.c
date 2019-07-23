@@ -14,12 +14,59 @@ static int initialise(SeidelTriangulator* state, int n)
   return 0;
 }
 
-SeidelTriangulator* SeidelTriangulatorCreate(void) {
+SeidelTriangulator* SeidelTriangulatorCreate(int n) {
+    SeidelTriangulator* ret = (SeidelTriangulator*) malloc(sizeof(SeidelTriangulator));
+    /*
+    ret->segSize = SEGSIZE;///!!!n + 1;
+    ret->qSize = 8 * ret->segSize;
+    ret->trSize = 4 * ret->segSize;
+    /*/
+    ret->segSize = SEGSIZE;
+    ret->qSize = QSIZE;
+    ret->trSize = TRSIZE;
+    //*/
+//    ret->qs = (node_t*) malloc(sizeof(node_t) * ret->qSize);        /* Query structure */ //qSize
+//    ret->tr = (trap_t*) malloc(sizeof(trap_t) * ret->trSize);        /* Trapezoid structure */ //trSize
+//    ret->seg = (segment_t*) malloc(sizeof(segment_t) * ret->segSize);        /* Segment table */ //SEGSIZE
     
+    ret->q_idx = 0;
+    ret->tr_idx = 0;
+    
+    ret->choose_idx = 0;
+//    ret->permute = (int*) malloc(sizeof(int) * ret->segSize);//SEGSIZE
+    
+//    ret->mchain = (monchain_t*) malloc(sizeof(monchain_t) * ret->trSize); //TRSIZE /* Table to hold all the monotone */
+    /* polygons . Each monotone polygon */
+    /* is a circularly linked list */
+    
+//    ret->vert = (vertexchain_t*) malloc(sizeof(vertexchain_t) * ret->segSize); //SEGSIZE /* chain init. information. This */
+    /* is used to decide which */
+    /* monotone polygon to split if */
+    /* there are several other */
+    /* polygons touching at the same */
+    /* vertex  */
+    
+//    ret->mon = (int*) malloc(sizeof(int) * ret->segSize); //SEGSIZE  /* contains position of any vertex in */
+    /* the monotone chain for the polygon */
+//    ret->visited = (int*) malloc(sizeof(int) * ret->trSize); //TRSIZE
+    ret->chain_idx = 0;
+    ret->op_idx = 0;
+    ret->mon_idx = 0;
+    
+    return ret;
 }
 
 void SeidelTriangulatorRelease(SeidelTriangulator* state) {
-    
+    if (!state) return;
+//    free(state->qs);
+//    free(state->tr);
+//    free(state->seg);
+//    free(state->permute);
+//    free(state->mchain);
+//    free(state->vert);
+//    free(state->mon);
+//    free(state->visited);
+    free(state);
 }
 
 #ifdef STANDALONE
@@ -29,7 +76,8 @@ int main(argc, argv)
      char *argv[];
 {
   int n, nmonpoly, genus;
-  int op[SEGSIZE][3], i, ntriangles;
+  int i, ntriangles;
+//    int op[SEGSIZE][3];
 
   if ((argc < 2) || ((n = read_segments(argv[1], &genus)) < 0))
     {
@@ -74,12 +122,21 @@ int main(argc, argv)
  * Enough space must be allocated for all the arrays before calling
  * this routine
  */
-SeidelTriangulator* triangulate_polygon(int ncontours, int cntr[], double (*vertices)[2], int (*triangles)[3])
+void triangulate_polygon(SeidelTriangulator** inoutTriangulatorPtr, int ncontours, int cntr[], double (*vertices)[2], int (*triangles)[3])
 {
   register int i;
   int nmonpoly, ccount, npoints, genus;
   int n;
 
+    SeidelTriangulator* state = *inoutTriangulatorPtr;
+    if (NULL == state)
+    {
+        int vertexCount = 0;
+        for (int c=0; c<ncontours; c++) vertexCount += cntr[c];
+        state = SeidelTriangulatorCreate(vertexCount);
+        *inoutTriangulatorPtr = state;
+    }
+    
   memset((void *)state->seg, 0, sizeof(state->seg));
   ccount = 0;
   i = 1;
@@ -129,8 +186,6 @@ SeidelTriangulator* triangulate_polygon(int ncontours, int cntr[], double (*vert
   construct_trapezoids(state, n);
   nmonpoly = monotonate_trapezoids(state, n);
   triangulate_monotone_polygons(state, n, nmonpoly, triangles);
-  
-  return 0;
 }
 
 

@@ -192,7 +192,7 @@ int monotonate_trapezoids(SeidelTriangulator* state, int n)
   
   /* First locate a trapezoid which lies inside the polygon */
   /* and which is triangular */
-  for (i = 0; i < TRSIZE; i++)
+  for (i = 0; i < state->trSize; i++)
     if (inside_polygon(state, &state->tr[i]))
       break;
   tr_start = i;
@@ -630,7 +630,8 @@ int triangulate_monotone_polygons(SeidelTriangulator* state, int nvert, int nmon
 static int triangulate_single_polygon(SeidelTriangulator* state, int nvert, int posmax, int side, int op[][3])
 {
   register int v;
-  int rc[SEGSIZE], ri = 0;	/* reflex chain */
+  int ri = 0;	/* reflex chain */
+  int* rc = (int*)malloc(sizeof(int) * state->segSize);
   int endv, tmp, vpos;
   
   if (side == TRI_RHS)		/* RHS segment is a single segment */
@@ -695,7 +696,7 @@ static int triangulate_single_polygon(SeidelTriangulator* state, int nvert, int 
   op[state->op_idx][2] = v;
   state->op_idx++;
   ri--;
-  
+  free(rc);
   return 0;
 }
 

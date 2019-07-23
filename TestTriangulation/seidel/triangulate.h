@@ -61,35 +61,44 @@ typedef struct {
   int nextfree;
 } vertexchain_t;
 
+#define SEGSIZE 200        /* max# of segments. Determines how */
+/* many points can be specified as */
+/* input. If your datasets have large */
+/* number of points, increase this */
+/* value accordingly. */
+
+#define QSIZE   8*SEGSIZE    /* maximum table sizes */
+#define TRSIZE  4*SEGSIZE    /* max# trapezoids */
+
 typedef struct {
-    const int qSize;
-    const int trSize;
-    const int segSize;
+    int qSize;
+    int trSize;
+    int segSize;
     
-    node_t* qs;        /* Query structure */ //qSize
-    trap_t* tr;        /* Trapezoid structure */ //trSize
-    segment_t* seg;        /* Segment table */ //SEGSIZE
+    node_t qs[QSIZE];        /* Query structure */ //qSize
+    trap_t tr[TRSIZE];        /* Trapezoid structure */ //trSize
+    segment_t seg[SEGSIZE];        /* Segment table */ //SEGSIZE
     
     int q_idx;
     int tr_idx;
     
     int choose_idx;
-    int* permute;//SEGSIZE
+    int permute[SEGSIZE];//SEGSIZE
     
-    monchain_t* mchain; //TRSIZE /* Table to hold all the monotone */
+    monchain_t mchain[TRSIZE]; //TRSIZE /* Table to hold all the monotone */
     /* polygons . Each monotone polygon */
     /* is a circularly linked list */
     
-    vertexchain_t* vert; //SEGSIZE /* chain init. information. This */
+    vertexchain_t vert[SEGSIZE]; //SEGSIZE /* chain init. information. This */
     /* is used to decide which */
     /* monotone polygon to split if */
     /* there are several other */
     /* polygons touching at the same */
     /* vertex  */
     
-    int* mon; //SEGSIZE  /* contains position of any vertex in */
+    int mon[SEGSIZE]; //SEGSIZE  /* contains position of any vertex in */
     /* the monotone chain for the polygon */
-    int* visited; //TRSIZE
+    int visited[TRSIZE]; //TRSIZE
     int chain_idx, op_idx, mon_idx;
     
 } SeidelTriangulator;
@@ -99,16 +108,6 @@ typedef struct {
 #define T_X     1
 #define T_Y     2
 #define T_SINK  3
-
-
-#define SEGSIZE 200		/* max# of segments. Determines how */
-				/* many points can be specified as */
-				/* input. If your datasets have large */
-				/* number of points, increase this */
-				/* value accordingly. */
-
-#define QSIZE   8*SEGSIZE	/* maximum table sizes */
-#define TRSIZE  4*SEGSIZE	/* max# trapezoids */
 
 
 #define TRUE  1
