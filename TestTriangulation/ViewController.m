@@ -154,6 +154,27 @@ bool isPointInPolygon(vector_float2 point, const vector_float2* polygonVertices,
     return (signSum != 0);
 }
 
+bool isPolygonClockwise(const vector_float2* vertices, size_t verticesCount) {
+    float leftMostX = vertices[0].x;
+    size_t leftMostIndex = 0;
+    for (size_t i=1; i<verticesCount; ++i)
+    {
+        if (vertices[i].x < leftMostX)
+        {
+            leftMostX = vertices[i].x;
+            leftMostIndex = i;
+        }
+    }
+    vector_float2 vAnchor = vertices[leftMostIndex];
+    vector_float2 v0 = leftMostIndex > 0 ? vertices[leftMostIndex - 1] : vertices[verticesCount - 1];
+    vector_float2 v1 = leftMostIndex < verticesCount - 1 ? vertices[leftMostIndex + 1] : vertices[0];
+    // Cross Product : Z = X1 * Y2 - X2 * Y1
+    float x0 = vAnchor.x - v0.x, x1 = v1.x - vAnchor.x;
+    float y0 = vAnchor.y - v0.y, y1 = v1.y - vAnchor.y;
+    float crossProductZ = x0 * y1 - x1 * y0;
+    return (crossProductZ <= 0);
+}
+
 @interface ViewController () <MTKViewDelegate>
 
 @property (nonatomic, strong) MTKView* mtView;
@@ -424,34 +445,52 @@ bool isPointInPolygon(vector_float2 point, const vector_float2* polygonVertices,
 }
 
 -(void) triangulate {
-    //            triangulate_polygon(<#int#>, <#int *#>, <#double (*)[2]#>, <#int (*)[3]#>)
     if (_polygonSizes.count == 0) return;
-    NSInteger verticesCount = [_polygonSizes[0] integerValue];
-    float leftMostX = _polygonVerticesData[0].x;
-    NSInteger leftMostIndex = 0;
-    for (NSInteger i=1; i<verticesCount; ++i)
+    int* polygonSizes = (int*) malloc(sizeof(int) * _polygonSizes.count);
+    size_t totalPolygonVertices = _totalVerticesCount - _currentPolygonVerticesCount;
+    double* vertices = (double*) malloc(sizeof(double) * 2 * totalPolygonVertices);
+    // The number of output triangles produced for a polygon with n points is, (n - 2) + 2*(#holes)
+    size_t trianglesCount = totalPolygonVertices - 2 + 2 * (_polygonSizes.count - 1);
+    int* triangles = (int*) malloc(sizeof(int) * 3 * trianglesCount);
+    size_t vertexStartIndex = 0;
+    double* pDst = vertices;
+    for (NSInteger i = 0; i < _polygonSizes.count; ++i)
     {
-        if (_polygonVerticesData[i].x < leftMostX)
+        int polygonSize = [_polygonSizes[i] intValue];
+        polygonSizes[i] = polygonSize;
+        
+        bool shouldReverse = isPolygonClockwise(_polygonVerticesData + vertexStartIndex, polygonSize) ^ (0 != i);
+        if (shouldReverse)
         {
-            leftMostX = _polygonVerticesData[i].x;
-            leftMostIndex = i;
+            const vector_float2* pSrc = _polygonVerticesData + vertexStartIndex + polygonSize - 1;
+            for (NSInteger j = polygonSize; j > 0; --j)
+            {
+                pDst[0] = pSrc->x;
+                pDst[1] = pSrc->y;
+                pDst += 2;
+                pSrc--;
+            }
         }
-    }
-    vector_float2 vAnchor = _polygonVerticesData[leftMostIndex];
-    vector_float2 v0 = leftMostIndex > 0 ? _polygonVerticesData[leftMostIndex - 1] : _polygonVerticesData[verticesCount - 1];
-    vector_float2 v1 = leftMostIndex < verticesCount - 1 ? _polygonVerticesData[leftMostIndex + 1] : _polygonVerticesData[0];
-    // Cross Product : Z = X1 * Y2 - X2 * Y1
-    float x0 = vAnchor.x - v0.x, x1 = v1.x - vAnchor.x;
-    float y0 = vAnchor.y - v0.y, y1 = v1.y - vAnchor.y;
-    float crossProductZ = x0 * y1 - x1 * y0;
-    if (crossProductZ > 0)
-    {//CCW
+        else
+        {
+            const vector_float2* pSrc = _polygonVerticesData + vertexStartIndex;
+            for (NSInteger j = polygonSize; j > 0; --j)
+            {
+                pDst[0] = pSrc->x;
+                pDst[1] = pSrc->y;
+                pDst += 2;
+                pSrc++;
+            }
+        }
         
+        vertexStartIndex += polygonSize;
     }
-    else
-    {//CW
-        
-    }
+    
+    triangulate_polygon((int)_polygonSizes.count, polygonSizes, (double(*)[2])vertices, (int(*)[3])triangles);
+    
+    free(polygonSizes);
+    free(vertices);
+    free(triangles);
 }
 
 -(IBAction) onFinishButtonClicked:(id)sender {
