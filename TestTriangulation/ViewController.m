@@ -234,6 +234,13 @@ bool isPolygonClockwise(const vector_float2* vertices, size_t verticesCount) {
     }
 }
 
+-(void) setControlStates {
+    _addButton.enabled = _stage == 0 && _totalVerticesCount < _maxVerticesCount && _isCurrentLineValid;
+    _finishButton.enabled = _stage == 0 && _isCloseLineValid && _currentPolygonVerticesCount > 1;
+    _triangulateButton.enabled = _polygonSizes.count > 0;
+    _fillSwitch.enabled = _triangulateButton.enabled;
+}
+
 -(void) validateGeometry {
     _isCurrentLineValid = true;
     _isCloseLineValid = true;
@@ -333,8 +340,7 @@ bool isPolygonClockwise(const vector_float2* vertices, size_t verticesCount) {
         }
     }
 
-    _addButton.enabled = _isCurrentLineValid;
-    _finishButton.enabled = _isCloseLineValid;
+    [self setControlStates];
 }
 
 - (void)mtkView:(nonnull MTKView *)view drawableSizeWillChange:(CGSize)size {
@@ -451,13 +457,6 @@ bool isPolygonClockwise(const vector_float2* vertices, size_t verticesCount) {
             _polygonVerticesData[_totalVerticesCount++] = _cursor;
             _polygonVerticesData[_totalVerticesCount] = (vector_float2){0.f, 0.f};
             _currentPolygonVerticesCount++;
-            _finishButton.enabled = (_currentPolygonVerticesCount > 1);
-            _finishButton.hidden = !(_currentPolygonVerticesCount > 1);
-            if (_totalVerticesCount == _maxVerticesCount)
-            {
-                _addButton.enabled = NO;
-            }
-            
             [self validateGeometry];
         }
             break;
@@ -560,7 +559,8 @@ bool isPolygonClockwise(const vector_float2* vertices, size_t verticesCount) {
             [_polygonSizes addObject:@(_currentPolygonVerticesCount + 1)];
             _currentPolygonVerticesCount = 0;
             _finishButton.enabled = NO;
-            _triangulateButton.hidden = _polygonSizes.count <= 0;
+            _triangulateButton.enabled = _polygonSizes.count <= 0;
+            _fillSwitch.enabled = _triangulateButton.enabled;
             
             [self updateEndLineIndicesBuffer];
             [self validateGeometry];
@@ -579,16 +579,14 @@ bool isPolygonClockwise(const vector_float2* vertices, size_t verticesCount) {
         _stage = 1;
         [self triangulate];
         [_triangulateButton setTitle:@"继续编辑" forState:UIControlStateNormal];
-        _addButton.hidden = YES;
-        _finishButton.hidden = YES;
+        [self setControlStates];
         break;
     case 1:
         _stage = 0;
         _totalVerticesCount -= _currentPolygonVerticesCount;
         _currentPolygonVerticesCount = 0;
         [_triangulateButton setTitle:@"三角化" forState:UIControlStateNormal];
-        _addButton.hidden = NO;
-        _finishButton.hidden = !(_currentPolygonVerticesCount > 1);
+        [self setControlStates];
         break;
     default:
         break;
@@ -628,6 +626,7 @@ bool isPolygonClockwise(const vector_float2* vertices, size_t verticesCount) {
     _polygonVerticesData = (vector_float2*) malloc(sizeof(vector_float2) * _maxVerticesCount);
     _isCurrentLineValid = true;
     _isCloseLineValid = true;
+    [self setControlStates];
     
     UIPanGestureRecognizer* panRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(onPanGestureRecognized:)];
     [_mtView addGestureRecognizer:panRecognizer];

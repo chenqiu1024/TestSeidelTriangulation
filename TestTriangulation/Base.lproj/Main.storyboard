@@ -25,7 +25,7 @@
                                     <action selector="onAddButtonClicked:" destination="BYZ-38-t0r" eventType="touchUpInside" id="lak-jT-RuW"/>
                                 </connections>
                             </button>
-                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kgG-kK-U0p">
+                            <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kgG-kK-U0p">
                                 <rect key="frame" x="184" y="471" width="46" height="30"/>
                                 <state key="normal" title="三角化"/>
                                 <connections>
@@ -33,7 +33,7 @@
                                     <action selector="onTriangulateButtonClicked:" destination="BYZ-38-t0r" eventType="touchUpInside" id="mW8-Iw-ZqU"/>
                                 </connections>
                             </button>
-                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kxZ-l4-diU">
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kxZ-l4-diU">
                                 <rect key="frame" x="250" y="433" width="62" height="30"/>
                                 <state key="normal" title="完结轮廓"/>
                                 <connections>
@@ -48,7 +48,7 @@
                                 <color key="shadowColor" white="0.66666666669999997" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <size key="shadowOffset" width="1" height="1"/>
                             </label>
-                            <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Xka-23-PfG">
+                            <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Xka-23-PfG">
                                 <rect key="frame" x="182.5" y="507" width="51" height="31"/>
                             </switch>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="“添加顶点”将光标指向点添加入当前编辑的多边形 “完结轮廓”使光标指向点与当前多边形起点连接封闭 可处理内部包含任意多个孔的简单多边形，编辑的第一个多边形必须是外部多边形 " textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Nhu-Or-RVG">
