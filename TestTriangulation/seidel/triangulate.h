@@ -70,19 +70,43 @@ typedef struct {
 #define QSIZE   8*SEGSIZE    /* maximum table sizes */
 #define TRSIZE  4*SEGSIZE    /* max# trapezoids */
 
+//#define FIX_SIZED_ARRAY
+
 typedef struct {
     int qSize;
     int trSize;
     int segSize;
-    
+#ifdef FIX_SIZED_ARRAY
+    node_t qs[QSIZE];        /* Query structure */
+    trap_t tr[TRSIZE];        /* Trapezoid structure */
+    segment_t seg[SEGSIZE];        /* Segment table */
+#else
     node_t* qs;//[QSIZE];        /* Query structure */
     trap_t* tr;//[TRSIZE];        /* Trapezoid structure */
     segment_t* seg;//[SEGSIZE];        /* Segment table */
-    
+#endif
     int q_idx;
     int tr_idx;
     
     int choose_idx;
+#ifdef FIX_SIZED_ARRAY
+    int permute[SEGSIZE];
+        
+    monchain_t mchain[TRSIZE]; /* Table to hold all the monotone */
+    /* polygons . Each monotone polygon */
+    /* is a circularly linked list */
+        
+    vertexchain_t vert[SEGSIZE]; /* chain init. information. This */
+    /* is used to decide which */
+    /* monotone polygon to split if */
+    /* there are several other */
+    /* polygons touching at the same */
+    /* vertex  */
+        
+    int mon[SEGSIZE]; /* contains position of any vertex in */
+    /* the monotone chain for the polygon */
+    int visited[TRSIZE];
+#else
     int* permute;//[SEGSIZE];
     
     monchain_t* mchain;//[TRSIZE]; /* Table to hold all the monotone */
@@ -99,6 +123,7 @@ typedef struct {
     int* mon;//[SEGSIZE]; /* contains position of any vertex in */
     /* the monotone chain for the polygon */
     int* visited;//[TRSIZE];
+#endif
     int chain_idx, op_idx, mon_idx;
     
 } SeidelTriangulator;

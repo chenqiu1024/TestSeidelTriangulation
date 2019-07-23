@@ -15,24 +15,18 @@ static int initialise(SeidelTriangulator* state, int n)
 }
 
 void SeidelTriangulatorReset(SeidelTriangulator* state) {
-    memset(state->qs, 0, sizeof(node_t) * state->qSize);
-    memset(state->tr, 0, sizeof(trap_t) * state->trSize);
-    memset(state->seg, 0, sizeof(segment_t) * state->segSize);
-        
+//    memset(state->qs, 0, sizeof(node_t) * state->qSize);
+//    memset(state->tr, 0, sizeof(trap_t) * state->trSize);
+//    memset(state->seg, 0, sizeof(segment_t) * state->segSize);
+//    memset(state->permute, 0, sizeof(int) * state->segSize);
+//    memset(state->mchain, 0, sizeof(monchain_t) * state->trSize);
+//    memset(state->vert, 0, sizeof(vertexchain_t) * state->segSize);
+//    memset(state->mon, 0, sizeof(int) * state->segSize);
+//    memset(state->visited, 0, sizeof(int) * state->trSize);
+    
     state->q_idx = 0;
     state->tr_idx = 0;
-        
     state->choose_idx = 0;
-    memset(state->permute, 0, sizeof(int) * state->segSize);
-        
-    memset(state->mchain, 0, sizeof(monchain_t) * state->trSize);
-        
-    memset(state->vert, 0, sizeof(vertexchain_t) * state->segSize);
-        
-    memset(state->mon, 0, sizeof(int) * state->segSize);
-        
-    memset(state->visited, 0, sizeof(int) * state->trSize);
-        
     state->chain_idx = 0;
     state->op_idx = 0;
     state->mon_idx = 0;
@@ -40,8 +34,8 @@ void SeidelTriangulatorReset(SeidelTriangulator* state) {
 
 SeidelTriangulator* SeidelTriangulatorCreate(int n) {
     SeidelTriangulator* ret = (SeidelTriangulator*) malloc(sizeof(SeidelTriangulator));
-    /*
-    ret->segSize = SEGSIZE;///!!!n + 1;
+    //*
+    ret->segSize = n + 1;
     ret->qSize = 8 * ret->segSize;
     ret->trSize = 4 * ret->segSize;
     /*/
@@ -49,28 +43,29 @@ SeidelTriangulator* SeidelTriangulatorCreate(int n) {
     ret->qSize = QSIZE;
     ret->trSize = TRSIZE;
     //*/
+#ifndef FIX_SIZED_ARRAY
     ret->qs = (node_t*) malloc(sizeof(node_t) * ret->qSize);        /* Query structure */ //qSize
     ret->tr = (trap_t*) malloc(sizeof(trap_t) * ret->trSize);        /* Trapezoid structure */ //trSize
     ret->seg = (segment_t*) malloc(sizeof(segment_t) * ret->segSize);        /* Segment table */ //SEGSIZE
-    
+
     ret->permute = (int*) malloc(sizeof(int) * ret->segSize);//SEGSIZE
-    
+
     ret->mchain = (monchain_t*) malloc(sizeof(monchain_t) * ret->trSize); //TRSIZE /* Table to hold all the monotone */
     /* polygons . Each monotone polygon */
     /* is a circularly linked list */
-    
+
     ret->vert = (vertexchain_t*) malloc(sizeof(vertexchain_t) * ret->segSize); //SEGSIZE /* chain init. information. This */
     /* is used to decide which */
     /* monotone polygon to split if */
     /* there are several other */
     /* polygons touching at the same */
     /* vertex  */
-    
+
     ret->mon = (int*) malloc(sizeof(int) * ret->segSize); //SEGSIZE  /* contains position of any vertex in */
     /* the monotone chain for the polygon */
-    
+
     ret->visited = (int*) malloc(sizeof(int) * ret->trSize); //TRSIZE
-    
+#endif
     SeidelTriangulatorReset(ret);
     
     return ret;
@@ -78,6 +73,7 @@ SeidelTriangulator* SeidelTriangulatorCreate(int n) {
 
 void SeidelTriangulatorRelease(SeidelTriangulator* state) {
     if (!state) return;
+#ifndef FIX_SIZED_ARRAY
     free(state->qs);
     free(state->tr);
     free(state->seg);
@@ -86,6 +82,7 @@ void SeidelTriangulatorRelease(SeidelTriangulator* state) {
     free(state->vert);
     free(state->mon);
     free(state->visited);
+#endif
     free(state);
 }
 
