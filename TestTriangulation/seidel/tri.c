@@ -2,17 +2,24 @@
 #include <sys/time.h>
 #include <string.h>
 
-static int initialise(n)
-     int n;
+static int initialise(SeidelTriangulator* state, int n)
 {
   register int i;
 
   for (i = 1; i <= n; i++)
-    seg[i].is_inserted = FALSE;
+    state->seg[i].is_inserted = FALSE;
 
-  generate_random_ordering(n);
+  generate_random_ordering(state, n);
   
   return 0;
+}
+
+SeidelTriangulator* SeidelTriangulatorCreate(void) {
+    
+}
+
+void SeidelTriangulatorRelease(SeidelTriangulator* state) {
+    
 }
 
 #ifdef STANDALONE
@@ -30,14 +37,14 @@ int main(argc, argv)
       exit(1);
     }
 
-  initialise(n);
-  construct_trapezoids(n);
-  nmonpoly = monotonate_trapezoids(n);
-  ntriangles = triangulate_monotone_polygons(n, nmonpoly, op);
+  initialise(state, n);
+  construct_trapezoids(state, n);
+  nmonpoly = monotonate_trapezoids(state, n);
+  ntriangles = triangulate_monotone_polygons(state, n, nmonpoly, op);
 
   for (i = 0; i < ntriangles; i++)
     printf("triangle #%d: %d %d %d\n", i, 
-	   op[i][0], op[i][1], op[i][2]);
+	   state->op[i][0], state->op[i][1], state->op[i][2]);
 
   return 0;
 }
@@ -67,19 +74,13 @@ int main(argc, argv)
  * Enough space must be allocated for all the arrays before calling
  * this routine
  */
-
-
-int triangulate_polygon(ncontours, cntr, vertices, triangles)
-     int ncontours;
-     int cntr[];
-     double (*vertices)[2];
-     int (*triangles)[3];
+SeidelTriangulator* triangulate_polygon(int ncontours, int cntr[], double (*vertices)[2], int (*triangles)[3])
 {
   register int i;
   int nmonpoly, ccount, npoints, genus;
   int n;
 
-  memset((void *)seg, 0, sizeof(seg));
+  memset((void *)state->seg, 0, sizeof(state->seg));
   ccount = 0;
   i = 1;
   
@@ -93,29 +94,29 @@ int triangulate_polygon(ncontours, cntr, vertices, triangles)
       last = first + npoints - 1;
       for (j = 0; j < npoints; j++, i++)
 	{
-	  seg[i].v0.x = vertices[i][0];
-	  seg[i].v0.y = vertices[i][1];
+	  state->seg[i].v0.x = vertices[i][0];
+	  state->seg[i].v0.y = vertices[i][1];
 
 	  if (i == last)
 	    {
-	      seg[i].next = first;
-	      seg[i].prev = i-1;
-	      seg[i-1].v1 = seg[i].v0;
+	      state->seg[i].next = first;
+	      state->seg[i].prev = i-1;
+	      state->seg[i-1].v1 = state->seg[i].v0;
 	    }
 	  else if (i == first)
 	    {
-	      seg[i].next = i+1;
-	      seg[i].prev = last;
-	      seg[last].v1 = seg[i].v0;
+	      state->seg[i].next = i+1;
+	      state->seg[i].prev = last;
+	      state->seg[last].v1 = state->seg[i].v0;
 	    }
 	  else
 	    {
-	      seg[i].prev = i-1;
-	      seg[i].next = i+1;
-	      seg[i-1].v1 = seg[i].v0;
+	      state->seg[i].prev = i-1;
+	      state->seg[i].next = i+1;
+	      state->seg[i-1].v1 = state->seg[i].v0;
 	    }
 	  
-	  seg[i].is_inserted = FALSE;
+	  state->seg[i].is_inserted = FALSE;
 	}
       
       ccount++;
@@ -124,10 +125,10 @@ int triangulate_polygon(ncontours, cntr, vertices, triangles)
   genus = ncontours - 1;
   n = i-1;
 
-  initialise(n);
-  construct_trapezoids(n);
-  nmonpoly = monotonate_trapezoids(n);
-  triangulate_monotone_polygons(n, nmonpoly, triangles);
+  initialise(state, n);
+  construct_trapezoids(state, n);
+  nmonpoly = monotonate_trapezoids(state, n);
+  triangulate_monotone_polygons(state, n, nmonpoly, triangles);
   
   return 0;
 }
@@ -141,8 +142,7 @@ int triangulate_polygon(ncontours, cntr, vertices, triangles)
  * on the boundary is not consistent!!!
  */
 
-int is_point_inside_polygon(vertex)
-     double vertex[2];
+int is_point_inside_polygon(SeidelTriangulator* state, double vertex[2])
 {
   point_t v;
   int trnum, rseg;
@@ -151,8 +151,8 @@ int is_point_inside_polygon(vertex)
   v.x = vertex[0];
   v.y = vertex[1];
   
-  trnum = locate_endpoint(&v, &v, 1);
-  t = &tr[trnum];
+  trnum = locate_endpoint(state, &v, &v, 1);
+  t = &state->tr[trnum];
   
   if (t->state == ST_INVALID)
     return FALSE;
@@ -160,7 +160,7 @@ int is_point_inside_polygon(vertex)
   if ((t->lseg <= 0) || (t->rseg <= 0))
     return FALSE;
   rseg = t->rseg;
-  return _greater_than_equal_to(&seg[rseg].v1, &seg[rseg].v0);
+  return _greater_than_equal_to(&state->seg[rseg].v1, &state->seg[rseg].v0);
 }
 
 

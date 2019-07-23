@@ -61,6 +61,38 @@ typedef struct {
   int nextfree;
 } vertexchain_t;
 
+typedef struct {
+    const int qSize;
+    const int trSize;
+    const int segSize;
+    
+    node_t* qs;        /* Query structure */ //qSize
+    trap_t* tr;        /* Trapezoid structure */ //trSize
+    segment_t* seg;        /* Segment table */ //SEGSIZE
+    
+    int q_idx;
+    int tr_idx;
+    
+    int choose_idx;
+    int* permute;//SEGSIZE
+    
+    monchain_t* mchain; //TRSIZE /* Table to hold all the monotone */
+    /* polygons . Each monotone polygon */
+    /* is a circularly linked list */
+    
+    vertexchain_t* vert; //SEGSIZE /* chain init. information. This */
+    /* is used to decide which */
+    /* monotone polygon to split if */
+    /* there are several other */
+    /* polygons touching at the same */
+    /* vertex  */
+    
+    int* mon; //SEGSIZE  /* contains position of any vertex in */
+    /* the monotone chain for the polygon */
+    int* visited; //TRSIZE
+    int chain_idx, op_idx, mon_idx;
+    
+} SeidelTriangulator;
 
 /* Node types */
 
@@ -130,30 +162,29 @@ typedef struct {
 #define FP_EQUAL(s, t) (fabs(s - t) <= C_EPS)
 
 
-
-/* Global variables */
-
-extern node_t qs[QSIZE];		/* Query structure */
-extern trap_t tr[TRSIZE];		/* Trapezoid structure */
-extern segment_t seg[SEGSIZE];		/* Segment table */
-
-
 /* Functions */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-extern int monotonate_trapezoids(int);
-extern int triangulate_monotone_polygons(int, int, int (*)[3]);
+int monotonate_trapezoids(SeidelTriangulator*, int);
+int triangulate_monotone_polygons(SeidelTriangulator*, int, int, int (*)[3]);
 
-extern int _greater_than(point_t *, point_t *);
-extern int _equal_to(point_t *, point_t *);
-extern int _greater_than_equal_to(point_t *, point_t *);
-extern int _less_than(point_t *, point_t *);
-extern int locate_endpoint(point_t *, point_t *, int);
-extern int construct_trapezoids(int);
+int _greater_than(point_t *, point_t *);
+int _equal_to(point_t *, point_t *);
+int _greater_than_equal_to(point_t *, point_t *);
+int _less_than(point_t *, point_t *);
+int locate_endpoint(SeidelTriangulator*, point_t *, point_t *, int);
+int construct_trapezoids(SeidelTriangulator*, int);
 
-extern int generate_random_ordering(int);
-extern int choose_segment(void);
-extern int read_segments(char *, int *);
-extern int math_logstar_n(int);
-extern int math_N(int, int);
+int generate_random_ordering(SeidelTriangulator*, int);
+int choose_segment(SeidelTriangulator*);
+int read_segments(char *, int *);
+int math_logstar_n(int);
+int math_N(int, int);
+    
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* triangulate_h */
