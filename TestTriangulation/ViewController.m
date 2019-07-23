@@ -410,7 +410,7 @@ bool isPolygonClockwise(const vector_float2* vertices, size_t verticesCount) {
             }
         }
     }
-    else if (1 == _stage)
+    else if (1 == _stage && _triangleIndicesBuffer)
     {
         // The number of output triangles produced for a polygon with n points is, (n - 2) + 2*(#holes)
         size_t totalPolygonVertices = _totalVerticesCount - _currentPolygonVerticesCount;
@@ -517,7 +517,7 @@ bool isPolygonClockwise(const vector_float2* vertices, size_t verticesCount) {
             [_polygonSizes addObject:@(_currentPolygonVerticesCount + 1)];
             _currentPolygonVerticesCount = 0;
             _finishButton.enabled = NO;
-            _triangulateButton.hidden = _polygonSizes.count > 0;
+            _triangulateButton.hidden = _polygonSizes.count <= 0;
             
             [self updateEndLineIndicesBuffer];
             [self validateGeometry];
@@ -534,6 +534,7 @@ bool isPolygonClockwise(const vector_float2* vertices, size_t verticesCount) {
     {
     case 0:
         _stage = 1;
+        [self triangulate];
         [_triangulateButton setTitle:@"继续编辑" forState:UIControlStateNormal];
         _addButton.hidden = YES;
         _finishButton.hidden = YES;
