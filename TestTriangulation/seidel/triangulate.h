@@ -75,30 +75,30 @@ typedef struct {
     int trSize;
     int segSize;
     
-    node_t qs[QSIZE];        /* Query structure */ //qSize
-    trap_t tr[TRSIZE];        /* Trapezoid structure */ //trSize
-    segment_t seg[SEGSIZE];        /* Segment table */ //SEGSIZE
+    node_t* qs;//[QSIZE];        /* Query structure */
+    trap_t* tr;//[TRSIZE];        /* Trapezoid structure */
+    segment_t* seg;//[SEGSIZE];        /* Segment table */
     
     int q_idx;
     int tr_idx;
     
     int choose_idx;
-    int permute[SEGSIZE];//SEGSIZE
+    int* permute;//[SEGSIZE];
     
-    monchain_t mchain[TRSIZE]; //TRSIZE /* Table to hold all the monotone */
+    monchain_t* mchain;//[TRSIZE]; /* Table to hold all the monotone */
     /* polygons . Each monotone polygon */
     /* is a circularly linked list */
     
-    vertexchain_t vert[SEGSIZE]; //SEGSIZE /* chain init. information. This */
+    vertexchain_t* vert;//[SEGSIZE]; /* chain init. information. This */
     /* is used to decide which */
     /* monotone polygon to split if */
     /* there are several other */
     /* polygons touching at the same */
     /* vertex  */
     
-    int mon[SEGSIZE]; //SEGSIZE  /* contains position of any vertex in */
+    int* mon;//[SEGSIZE]; /* contains position of any vertex in */
     /* the monotone chain for the polygon */
-    int visited[TRSIZE]; //TRSIZE
+    int* visited;//[TRSIZE];
     int chain_idx, op_idx, mon_idx;
     
 } SeidelTriangulator;

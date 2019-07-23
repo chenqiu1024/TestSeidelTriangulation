@@ -25,30 +25,42 @@ SeidelTriangulator* SeidelTriangulatorCreate(int n) {
     ret->qSize = QSIZE;
     ret->trSize = TRSIZE;
     //*/
-//    ret->qs = (node_t*) malloc(sizeof(node_t) * ret->qSize);        /* Query structure */ //qSize
-//    ret->tr = (trap_t*) malloc(sizeof(trap_t) * ret->trSize);        /* Trapezoid structure */ //trSize
-//    ret->seg = (segment_t*) malloc(sizeof(segment_t) * ret->segSize);        /* Segment table */ //SEGSIZE
+    ret->qs = (node_t*) malloc(sizeof(node_t) * ret->qSize);        /* Query structure */ //qSize
+    memset(ret->qs, 0, sizeof(node_t) * ret->qSize);
+    
+    ret->tr = (trap_t*) malloc(sizeof(trap_t) * ret->trSize);        /* Trapezoid structure */ //trSize
+    memset(ret->tr, 0, sizeof(trap_t) * ret->trSize);
+    
+    ret->seg = (segment_t*) malloc(sizeof(segment_t) * ret->segSize);        /* Segment table */ //SEGSIZE
+    memset(ret->seg, 0, sizeof(segment_t) * ret->segSize);
     
     ret->q_idx = 0;
     ret->tr_idx = 0;
     
     ret->choose_idx = 0;
-//    ret->permute = (int*) malloc(sizeof(int) * ret->segSize);//SEGSIZE
+    ret->permute = (int*) malloc(sizeof(int) * ret->segSize);//SEGSIZE
+    memset(ret->permute, 0, sizeof(int) * ret->segSize);
     
-//    ret->mchain = (monchain_t*) malloc(sizeof(monchain_t) * ret->trSize); //TRSIZE /* Table to hold all the monotone */
+    ret->mchain = (monchain_t*) malloc(sizeof(monchain_t) * ret->trSize); //TRSIZE /* Table to hold all the monotone */
     /* polygons . Each monotone polygon */
     /* is a circularly linked list */
+    memset(ret->mchain, 0, sizeof(monchain_t) * ret->trSize);
     
-//    ret->vert = (vertexchain_t*) malloc(sizeof(vertexchain_t) * ret->segSize); //SEGSIZE /* chain init. information. This */
+    ret->vert = (vertexchain_t*) malloc(sizeof(vertexchain_t) * ret->segSize); //SEGSIZE /* chain init. information. This */
     /* is used to decide which */
     /* monotone polygon to split if */
     /* there are several other */
     /* polygons touching at the same */
     /* vertex  */
+    memset(ret->vert, 0, sizeof(vertexchain_t) * ret->segSize);
     
-//    ret->mon = (int*) malloc(sizeof(int) * ret->segSize); //SEGSIZE  /* contains position of any vertex in */
+    ret->mon = (int*) malloc(sizeof(int) * ret->segSize); //SEGSIZE  /* contains position of any vertex in */
     /* the monotone chain for the polygon */
-//    ret->visited = (int*) malloc(sizeof(int) * ret->trSize); //TRSIZE
+    memset(ret->mon, 0, sizeof(int) * ret->segSize);
+    
+    ret->visited = (int*) malloc(sizeof(int) * ret->trSize); //TRSIZE
+    memset(ret->visited, 0, sizeof(int) * ret->trSize);
+    
     ret->chain_idx = 0;
     ret->op_idx = 0;
     ret->mon_idx = 0;
@@ -58,14 +70,14 @@ SeidelTriangulator* SeidelTriangulatorCreate(int n) {
 
 void SeidelTriangulatorRelease(SeidelTriangulator* state) {
     if (!state) return;
-//    free(state->qs);
-//    free(state->tr);
-//    free(state->seg);
-//    free(state->permute);
-//    free(state->mchain);
-//    free(state->vert);
-//    free(state->mon);
-//    free(state->visited);
+    free(state->qs);
+    free(state->tr);
+    free(state->seg);
+    free(state->permute);
+    free(state->mchain);
+    free(state->vert);
+    free(state->mon);
+    free(state->visited);
     free(state);
 }
 
