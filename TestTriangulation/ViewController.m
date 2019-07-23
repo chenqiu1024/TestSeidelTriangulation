@@ -183,10 +183,12 @@ bool isPolygonClockwise(const vector_float2* vertices, size_t verticesCount) {
 
 @property (nonatomic, strong) IBOutlet UIButton* addButton;
 @property (nonatomic, strong) IBOutlet UIButton* finishButton;
+@property (nonatomic, strong) IBOutlet UIButton* triangulateButton;
 @property (nonatomic, strong) IBOutlet UILabel* infoLabel;
 
 -(IBAction) onAddButtonClicked:(id)sender;
 -(IBAction) onFinishButtonClicked:(id)sender;
+-(IBAction) onTriangulateButtonClicked:(id)sender;
 
 @property (nonatomic, assign) int stage;
 
@@ -511,6 +513,10 @@ bool isPolygonClockwise(const vector_float2* vertices, size_t verticesCount) {
         default:
             break;
     }
+}
+
+-(IBAction) onTriangulateButtonClicked:(id)sender {
+    
 }
 
 -(void) dealloc {

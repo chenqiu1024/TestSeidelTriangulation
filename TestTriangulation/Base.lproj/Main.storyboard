@@ -40,11 +40,21 @@
                                 <color key="shadowColor" white="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <size key="shadowOffset" width="1" height="1"/>
                             </label>
+                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kgG-kK-U0p">
+                                <rect key="frame" x="184" y="471" width="46" height="30"/>
+                                <state key="normal" title="三角化"/>
+                                <connections>
+                                    <action selector="onAddButtonClicked:" destination="BYZ-38-t0r" eventType="touchUpInside" id="xAd-b4-2aS"/>
+                                    <action selector="onTriangulateButtonClicked:" destination="BYZ-38-t0r" eventType="touchUpInside" id="mW8-Iw-ZqU"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
+                            <constraint firstItem="kgG-kK-U0p" firstAttribute="top" secondItem="2OL-Uf-tNa" secondAttribute="bottom" constant="8" id="7Jk-cV-rCH"/>
                             <constraint firstItem="2OL-Uf-tNa" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="Ak9-vD-ovQ"/>
                             <constraint firstItem="2OL-Uf-tNa" firstAttribute="centerX" secondItem="Nhu-Or-RVG" secondAttribute="centerX" id="IK2-Q8-k6I"/>
+                            <constraint firstItem="kgG-kK-U0p" firstAttribute="centerX" secondItem="2OL-Uf-tNa" secondAttribute="centerX" id="WK7-PB-uUf"/>
                             <constraint firstItem="2OL-Uf-tNa" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="WUz-wC-rgP"/>
                             <constraint firstItem="kxZ-l4-diU" firstAttribute="centerY" secondItem="2OL-Uf-tNa" secondAttribute="centerY" id="WnF-wb-l85"/>
                             <constraint firstItem="2OL-Uf-tNa" firstAttribute="top" secondItem="Nhu-Or-RVG" secondAttribute="bottom" constant="8" id="mGP-Hx-dV9"/>
@@ -56,6 +66,7 @@
                         <outlet property="addButton" destination="2OL-Uf-tNa" id="j8c-L2-Rzg"/>
                         <outlet property="finishButton" destination="kxZ-l4-diU" id="EAF-9R-U7L"/>
                         <outlet property="infoLabel" destination="Nhu-Or-RVG" id="xlU-z7-wsJ"/>
+                        <outlet property="triangulateButton" destination="kgG-kK-U0p" id="mol-Yl-uAp"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
