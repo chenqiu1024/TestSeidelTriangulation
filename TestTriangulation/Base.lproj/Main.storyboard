@@ -51,8 +51,8 @@
                             <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Xka-23-PfG">
                                 <rect key="frame" x="182.5" y="507" width="51" height="31"/>
                             </switch>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Nhu-Or-RVG">
-                                <rect key="frame" x="201.5" y="44" width="11.5" height="21.5"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="“添加顶点”将光标指向点添加入当前编辑的多边形 “完结轮廓”使光标指向点与当前多边形起点连接封闭 可处理内部包含任意多个孔的简单多边形，编辑的第一个多边形必须是外部多边形 " textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Nhu-Or-RVG">
+                                <rect key="frame" x="20" y="44" width="374" height="143.5"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <nil key="highlightedColor"/>
@@ -70,8 +70,10 @@
                             <constraint firstItem="kgG-kK-U0p" firstAttribute="centerX" secondItem="2OL-Uf-tNa" secondAttribute="centerX" id="WK7-PB-uUf"/>
                             <constraint firstItem="2OL-Uf-tNa" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="WUz-wC-rgP"/>
                             <constraint firstItem="kxZ-l4-diU" firstAttribute="centerY" secondItem="2OL-Uf-tNa" secondAttribute="centerY" id="WnF-wb-l85"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="Nhu-Or-RVG" secondAttribute="trailing" id="Z2X-BZ-F7h"/>
                             <constraint firstItem="Nhu-Or-RVG" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="dun-a8-YFy"/>
                             <constraint firstItem="Xka-23-PfG" firstAttribute="top" secondItem="kgG-kK-U0p" secondAttribute="bottom" constant="6" id="hCe-RW-dlL"/>
+                            <constraint firstItem="Nhu-Or-RVG" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="pJf-l4-okD"/>
                             <constraint firstItem="kxZ-l4-diU" firstAttribute="leading" secondItem="2OL-Uf-tNa" secondAttribute="trailing" constant="12" id="yFz-f7-P4r"/>
                             <constraint firstItem="gH9-S6-t24" firstAttribute="centerY" secondItem="Xka-23-PfG" secondAttribute="centerY" id="yfy-WI-qFN"/>
                         </constraints>
