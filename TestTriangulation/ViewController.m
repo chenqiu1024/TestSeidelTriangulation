@@ -204,6 +204,7 @@ bool isPolygonClockwise(const vector_float2* vertices, size_t verticesCount) {
 @property (nonatomic, assign) bool isCloseLineValid;
 
 @property (nonatomic, strong) id<MTLBuffer> endLineIndicesBuffer;
+@property (nonatomic, strong) id<MTLBuffer> triangleIndicesBuffer;
 
 @end
 
@@ -359,59 +360,70 @@ bool isPolygonClockwise(const vector_float2* vertices, size_t verticesCount) {
     static const vector_float4 yellowColor = (vector_float4){1.f, 1.f, 0.f, 1.f};
     static const vector_float4 whiteColor = (vector_float4){1.f, 1.f, 1.f, 1.f};
     [renderEncoder setVertexBytes:&viewsize length:sizeof(viewsize) atIndex:ViewportSlot];
-    
-    vector_float2 crossLines[] = {
-        //*
-        (vector_float2){-1.f, _cursor.y},
-        (vector_float2){1.f, _cursor.y},
-        
-        (vector_float2){_cursor.x, -1.f},
-        (vector_float2){_cursor.x, 1.f},
-        /*/
-        (vector_float2){-1.f, 0.f},
-        (vector_float2){1.f, 0.f},
-        
-        //(vector_float4){0.f, -1.f, 0.f, 1.f},
-        //(vector_float4){0.f, 1.f, 0.f, 1.f},
-        //*/
-    };
-    [renderEncoder setVertexBytes:crossLines length:sizeof(crossLines) atIndex:VertexSlot];
-    [renderEncoder setFragmentBytes:&yellowColor length:sizeof(vector_float4) atIndex:ColorSlot];
-    [renderEncoder drawPrimitives:MTLPrimitiveTypeLine vertexStart:0 vertexCount:sizeof(crossLines)/sizeof(crossLines[0]) instanceCount:1];
 
-    [renderEncoder setVertexBytes:_polygonVerticesData length:sizeof(vector_float2) * (_totalVerticesCount + 1) atIndex:VertexSlot];
-    [renderEncoder setFragmentBytes:&greenColor length:sizeof(vector_float4) atIndex:ColorSlot];
-    int vertexIndex = 0;
-    if (_polygonSizes.count > 0)
-    {// Draw completed polygons:
+    if (0 == _stage)
+    {
+        vector_float2 crossLines[] = {
+            //*
+            (vector_float2){-1.f, _cursor.y},
+            (vector_float2){1.f, _cursor.y},
+            
+            (vector_float2){_cursor.x, -1.f},
+            (vector_float2){_cursor.x, 1.f},
+            /*/
+             (vector_float2){-1.f, 0.f},
+             (vector_float2){1.f, 0.f},
+             
+             //(vector_float4){0.f, -1.f, 0.f, 1.f},
+             //(vector_float4){0.f, 1.f, 0.f, 1.f},
+             //*/
+        };
+        [renderEncoder setVertexBytes:crossLines length:sizeof(crossLines) atIndex:VertexSlot];
+        [renderEncoder setFragmentBytes:&yellowColor length:sizeof(vector_float4) atIndex:ColorSlot];
+        [renderEncoder drawPrimitives:MTLPrimitiveTypeLine vertexStart:0 vertexCount:sizeof(crossLines)/sizeof(crossLines[0]) instanceCount:1];
         
-        for (NSNumber* polygonSize in _polygonSizes)
-        {// Draw lines of each polygon except the last line(from 0 to N-1):
-            uint32_t verticesCount = (uint32_t)[polygonSize integerValue];
-            [renderEncoder drawPrimitives:MTLPrimitiveTypeLineStrip vertexStart:vertexIndex vertexCount:verticesCount instanceCount:1];
-            vertexIndex += verticesCount;
+        [renderEncoder setVertexBytes:_polygonVerticesData length:sizeof(vector_float2) * (_totalVerticesCount + 1) atIndex:VertexSlot];
+        [renderEncoder setFragmentBytes:&greenColor length:sizeof(vector_float4) atIndex:ColorSlot];
+        int vertexIndex = 0;
+        if (_polygonSizes.count > 0)
+        {// Draw completed polygons:
+            
+            for (NSNumber* polygonSize in _polygonSizes)
+            {// Draw lines of each polygon except the last line(from 0 to N-1):
+                uint32_t verticesCount = (uint32_t)[polygonSize integerValue];
+                [renderEncoder drawPrimitives:MTLPrimitiveTypeLineStrip vertexStart:vertexIndex vertexCount:verticesCount instanceCount:1];
+                vertexIndex += verticesCount;
+            }
+            // Draw the 'last' lines:
+            
+            [renderEncoder drawIndexedPrimitives:MTLPrimitiveTypeLine indexCount:(2 * _polygonSizes.count) indexType:MTLIndexTypeUInt32 indexBuffer:_endLineIndicesBuffer indexBufferOffset:0];
         }
-        // Draw the 'last' lines:
-        
-        [renderEncoder drawIndexedPrimitives:MTLPrimitiveTypeLine indexCount:(2 * _polygonSizes.count) indexType:MTLIndexTypeUInt32 indexBuffer:_endLineIndicesBuffer indexBufferOffset:0];
+        if (_currentPolygonVerticesCount > 0)
+        {// Draw the incompleted(editing) polygon:
+            [renderEncoder drawPrimitives:MTLPrimitiveTypeLineStrip vertexStart:vertexIndex vertexCount:_currentPolygonVerticesCount + 1 instanceCount:1];
+            if (_currentPolygonVerticesCount > 1)
+            {
+                [renderEncoder setFragmentBytes:&whiteColor length:sizeof(vector_float4) atIndex:ColorSlot];
+                vector_float2 line[] = {_polygonVerticesData[vertexIndex], _polygonVerticesData[vertexIndex + _currentPolygonVerticesCount]};
+                [renderEncoder setVertexBytes:line length:sizeof(line) atIndex:VertexSlot];
+                [renderEncoder drawPrimitives:MTLPrimitiveTypeLine vertexStart:0 vertexCount:2];
+            }
+        }
     }
-    if (_currentPolygonVerticesCount > 0)
-    {// Draw the incompleted(editing) polygon:
-        [renderEncoder drawPrimitives:MTLPrimitiveTypeLineStrip vertexStart:vertexIndex vertexCount:_currentPolygonVerticesCount + 1 instanceCount:1];
-        if (_currentPolygonVerticesCount > 1)
-        {
-            [renderEncoder setFragmentBytes:&whiteColor length:sizeof(vector_float4) atIndex:ColorSlot];
-            vector_float2 line[] = {_polygonVerticesData[vertexIndex], _polygonVerticesData[vertexIndex + _currentPolygonVerticesCount]};
-            [renderEncoder setVertexBytes:line length:sizeof(line) atIndex:VertexSlot];
-            [renderEncoder drawPrimitives:MTLPrimitiveTypeLine vertexStart:0 vertexCount:2];
-        }
+    else if (1 == _stage)
+    {
+        // The number of output triangles produced for a polygon with n points is, (n - 2) + 2*(#holes)
+        size_t totalPolygonVertices = _totalVerticesCount - _currentPolygonVerticesCount;
+        size_t trianglesCount = totalPolygonVertices - 2 + 2 * (_polygonSizes.count - 1);
+        [renderEncoder setVertexBytes:_polygonVerticesData length:sizeof(vector_float2) * totalPolygonVertices atIndex:VertexSlot];
+        [renderEncoder setFragmentBytes:&greenColor length:sizeof(vector_float4) atIndex:ColorSlot];
+        [renderEncoder drawIndexedPrimitives:MTLPrimitiveTypeTriangle indexCount:(3 * trianglesCount) indexType:MTLIndexTypeUInt32 indexBuffer:_triangleIndicesBuffer indexBufferOffset:0];
     }
     
     [renderEncoder endEncoding];
-
+    
     [commandBuffer presentDrawable:view.currentDrawable];
     [commandBuffer commit];
-    
 }
 
 -(void) onPanGestureRecognized:(UIPanGestureRecognizer*)recognizer {
@@ -489,6 +501,7 @@ bool isPolygonClockwise(const vector_float2* vertices, size_t verticesCount) {
     }
     
     triangulate_polygon((int)_polygonSizes.count, polygonSizes, (double(*)[2])vertices, (int(*)[3])triangles);
+    _triangleIndicesBuffer = [_mtView.device newBufferWithBytes:triangles length:(sizeof(int) * 3 * trianglesCount) options:MTLResourceOptionCPUCacheModeDefault];
     
     free(polygonSizes);
     free(vertices);
@@ -504,6 +517,7 @@ bool isPolygonClockwise(const vector_float2* vertices, size_t verticesCount) {
             [_polygonSizes addObject:@(_currentPolygonVerticesCount + 1)];
             _currentPolygonVerticesCount = 0;
             _finishButton.enabled = NO;
+            _triangulateButton.hidden = _polygonSizes.count > 0;
             
             [self updateEndLineIndicesBuffer];
             [self validateGeometry];
@@ -516,7 +530,23 @@ bool isPolygonClockwise(const vector_float2* vertices, size_t verticesCount) {
 }
 
 -(IBAction) onTriangulateButtonClicked:(id)sender {
-    
+    switch (_stage)
+    {
+    case 0:
+        _stage = 1;
+        [_triangulateButton setTitle:@"继续编辑" forState:UIControlStateNormal];
+        _addButton.hidden = YES;
+        _finishButton.hidden = YES;
+        break;
+    case 1:
+        _stage = 0;
+        [_triangulateButton setTitle:@"三角化" forState:UIControlStateNormal];
+        _addButton.hidden = NO;
+        _finishButton.hidden = !(_currentPolygonVerticesCount > 1);
+        break;
+    default:
+        break;
+    }
 }
 
 -(void) dealloc {
