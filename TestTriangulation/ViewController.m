@@ -462,13 +462,13 @@ bool isPolygonClockwise(const vector_float2* vertices, size_t verticesCount) {
     if (_polygonSizes.count == 0) return;
     int* polygonSizes = (int*) malloc(sizeof(int) * _polygonSizes.count);
     size_t totalPolygonVertices = _totalVerticesCount - _currentPolygonVerticesCount;
-    double* vertices = (double*) malloc(sizeof(double) * 2 * totalPolygonVertices);
+    double* vertices = (double*) malloc(sizeof(double) * 2 * (totalPolygonVertices + 1));
     size_t* reorderedIndices = (size_t*) malloc(sizeof(size_t) * totalPolygonVertices);
     // The number of output triangles produced for a polygon with n points is, (n - 2) + 2*(#holes)
     size_t trianglesCount = totalPolygonVertices - 2 + 2 * (_polygonSizes.count - 1);
     int* triangles = (int*) malloc(sizeof(int) * 3 * trianglesCount);
     size_t vertexStartIndex = 0;
-    double* pDst = vertices;
+    double* pDst = vertices + 2;//vertices[0] must NOT be used (i.e. i/p starts from vertices[1] instead
     size_t* pIndices = reorderedIndices;
     for (NSInteger i = 0; i < _polygonSizes.count; ++i)
     {
@@ -513,9 +513,9 @@ bool isPolygonClockwise(const vector_float2* vertices, size_t verticesCount) {
     int* pTriangles = triangles;
     for (int i=0; i<trianglesCount; ++i)
     {
-        uint32_t v0 = (uint32_t) reorderedIndices[pTriangles[0]];
-        uint32_t v1 = (uint32_t) reorderedIndices[pTriangles[1]];
-        uint32_t v2 = (uint32_t) reorderedIndices[pTriangles[2]];
+        uint32_t v0 = (uint32_t) reorderedIndices[pTriangles[0] - 1];
+        uint32_t v1 = (uint32_t) reorderedIndices[pTriangles[1] - 1];
+        uint32_t v2 = (uint32_t) reorderedIndices[pTriangles[2] - 1];
         pTriangleLines[0] = v0;
         pTriangleLines[1] = v1;
         pTriangleLines[2] = v1;
@@ -567,6 +567,8 @@ bool isPolygonClockwise(const vector_float2* vertices, size_t verticesCount) {
         break;
     case 1:
         _stage = 0;
+        _totalVerticesCount -= _currentPolygonVerticesCount;
+        _currentPolygonVerticesCount = 0;
         [_triangulateButton setTitle:@"三角化" forState:UIControlStateNormal];
         _addButton.hidden = NO;
         _finishButton.hidden = !(_currentPolygonVerticesCount > 1);
