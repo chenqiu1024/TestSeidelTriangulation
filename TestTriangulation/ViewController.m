@@ -186,10 +186,13 @@ bool isPolygonClockwise(const vector_float2* vertices, size_t verticesCount) {
 @property (nonatomic, strong) IBOutlet UIButton* triangulateButton;
 @property (nonatomic, strong) IBOutlet UILabel* infoLabel;
 @property (nonatomic, strong) IBOutlet UISwitch* fillSwitch;
+@property (nonatomic, strong) IBOutlet UIButton* profileButton;
+@property (nonatomic, strong) IBOutlet UILabel* profileLabel;
 
 -(IBAction) onAddButtonClicked:(id)sender;
 -(IBAction) onFinishButtonClicked:(id)sender;
 -(IBAction) onTriangulateButtonClicked:(id)sender;
+-(IBAction) onProfileButtonClicked:(id)sender;
 
 @property (nonatomic, assign) int stage;
 
@@ -237,8 +240,11 @@ bool isPolygonClockwise(const vector_float2* vertices, size_t verticesCount) {
 -(void) setControlStates {
     _addButton.enabled = _stage == 0 && _totalVerticesCount < _maxVerticesCount && _isCurrentLineValid;
     _finishButton.enabled = _stage == 0 && _isCloseLineValid && _currentPolygonVerticesCount > 1;
+    
     _triangulateButton.enabled = _polygonSizes.count > 0;
     _fillSwitch.enabled = _triangulateButton.enabled;
+    _profileButton.enabled = _triangulateButton.enabled;
+    _profileLabel.hidden = !_triangulateButton.enabled;
 }
 
 -(void) validateGeometry {
@@ -548,6 +554,83 @@ bool isPolygonClockwise(const vector_float2* vertices, size_t verticesCount) {
     free(vertices);
     free(reorderedIndices);
     free(triangles);
+}
+
+-(void) profileTriangulation {
+    if (_polygonSizes.count == 0) return;
+    int* polygonSizes = (int*) malloc(sizeof(int) * _polygonSizes.count);
+    size_t totalPolygonVertices = _totalVerticesCount - _currentPolygonVerticesCount;
+    double* vertices = (double*) malloc(sizeof(double) * 2 * (totalPolygonVertices + 1));
+    size_t* reorderedIndices = (size_t*) malloc(sizeof(size_t) * totalPolygonVertices);
+    // The number of output triangles produced for a polygon with n points is, (n - 2) + 2*(#holes)
+    size_t trianglesCount = totalPolygonVertices - 2 + 2 * (_polygonSizes.count - 1);
+    int* triangles = (int*) malloc(sizeof(int) * 3 * trianglesCount);
+    size_t vertexStartIndex = 0;
+    double* pDst = vertices + 2;//vertices[0] must NOT be used (i.e. i/p starts from vertices[1] instead
+    size_t* pIndices = reorderedIndices;
+    for (NSInteger i = 0; i < _polygonSizes.count; ++i)
+    {
+        int polygonSize = [_polygonSizes[i] intValue];
+        polygonSizes[i] = polygonSize;
+        
+        bool shouldReverse = isPolygonClockwise(_polygonVerticesData + vertexStartIndex, polygonSize) ^ (0 != i);
+        if (shouldReverse)
+        {
+            const vector_float2* pSrc = _polygonVerticesData + vertexStartIndex + polygonSize - 1;
+            size_t originalIndex = vertexStartIndex + polygonSize - 1;
+            for (NSInteger j = polygonSize; j > 0; --j)
+            {
+                pDst[0] = pSrc->x;
+                pDst[1] = pSrc->y;
+                pDst += 2;
+                pSrc--;
+                *pIndices++ = originalIndex--;
+            }
+        }
+        else
+        {
+            const vector_float2* pSrc = _polygonVerticesData + vertexStartIndex;
+            size_t originalIndex = vertexStartIndex;
+            for (NSInteger j = polygonSize; j > 0; --j)
+            {
+                pDst[0] = pSrc->x;
+                pDst[1] = pSrc->y;
+                pDst += 2;
+                pSrc++;
+                *pIndices++ = originalIndex++;
+            }
+        }
+        
+        vertexStartIndex += polygonSize;
+    }
+    
+    const int TestCount = 1024;
+    NSDate* startTime = [NSDate date];
+    for (int i=TestCount; i>0; --i)
+    {
+        triangulate_polygon((int)_polygonSizes.count, polygonSizes, (double(*)[2])vertices, (int(*)[3])triangles);
+    }
+    NSTimeInterval timeUsage = [[NSDate date] timeIntervalSinceDate:startTime];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.profileLabel.text = [NSString stringWithFormat:@"%ld vertices, %ld holes, total %f ms for %d times, average %f ms for one triangulation", totalPolygonVertices, self.polygonSizes.count - 1, timeUsage * 1000, TestCount, timeUsage * 1000 / TestCount];
+        self.stage = 0;
+        [self setControlStates];
+    });
+    
+    free(polygonSizes);
+    free(vertices);
+    free(reorderedIndices);
+    free(triangles);
+}
+
+-(IBAction) onProfileButtonClicked:(id)sender {
+    _stage = 2;
+    _profileButton.enabled = NO;
+    _profileLabel.text = @"Profiling...";
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [self profileTriangulation];
+    });
+    [self setControlStates];
 }
 
 -(IBAction) onFinishButtonClicked:(id)sender {

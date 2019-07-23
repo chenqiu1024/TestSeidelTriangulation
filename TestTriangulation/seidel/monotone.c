@@ -189,7 +189,7 @@ static int make_new_monotone_poly(mcur, v0, v1)
   vp0->nextfree++;
   vp1->nextfree++;
 
-#ifdef DEBUG
+#ifdef DEBUG_SEIDEL
   fprintf(stderr, "make_poly: mcur = %d, (v0, v1) = (%d, %d)\n", 
 	  mcur, v0, v1);
   fprintf(stderr, "next posns = (p, q) = (%d, %d)\n", p, q);
@@ -574,7 +574,7 @@ int triangulate_monotone_polygons(nvert, nmonpoly, op)
   int p, vfirst, posmax, posmin, v;
   int vcount, processed;
 
-#ifdef DEBUG
+#ifdef DEBUG_SEIDEL
   for (i = 0; i < nmonpoly; i++)
     {
       fprintf(stderr, "\n\nPolygon %d: ", i);
@@ -646,7 +646,7 @@ int triangulate_monotone_polygons(nvert, nmonpoly, op)
 	}
     }
   
-#ifdef DEBUG
+#ifdef DEBUG_SEIDEL
   for (i = 0; i < op_idx; i++)
     fprintf(stderr, "tri #%d: (%d, %d, %d)\n", i, op[i][0], op[i][1],
 	   op[i][2]);

@@ -29,8 +29,14 @@
                                 <rect key="frame" x="184" y="471" width="46" height="30"/>
                                 <state key="normal" title="三角化"/>
                                 <connections>
-                                    <action selector="onAddButtonClicked:" destination="BYZ-38-t0r" eventType="touchUpInside" id="xAd-b4-2aS"/>
                                     <action selector="onTriangulateButtonClicked:" destination="BYZ-38-t0r" eventType="touchUpInside" id="mW8-Iw-ZqU"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="mDe-Or-zcS">
+                                <rect key="frame" x="168.5" y="568" width="77" height="30"/>
+                                <state key="normal" title="三角化测速"/>
+                                <connections>
+                                    <action selector="onProfileButtonClicked:" destination="BYZ-38-t0r" eventType="touchUpInside" id="p5k-P2-WAv"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kxZ-l4-diU">
@@ -59,6 +65,14 @@
                                 <color key="shadowColor" white="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <size key="shadowOffset" width="1" height="1"/>
                             </label>
+                            <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="-.-" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DTl-vP-hJE">
+                                <rect key="frame" x="0.0" y="604" width="414" height="21.5"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <nil key="highlightedColor"/>
+                                <color key="shadowColor" white="0.66666666669999997" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <size key="shadowOffset" width="1" height="1"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
@@ -67,13 +81,18 @@
                             <constraint firstItem="Xka-23-PfG" firstAttribute="centerX" secondItem="kgG-kK-U0p" secondAttribute="centerX" id="BmR-NE-a0A"/>
                             <constraint firstItem="2OL-Uf-tNa" firstAttribute="centerX" secondItem="Nhu-Or-RVG" secondAttribute="centerX" id="IK2-Q8-k6I"/>
                             <constraint firstItem="gH9-S6-t24" firstAttribute="leading" secondItem="Xka-23-PfG" secondAttribute="trailing" constant="6" id="PBX-o2-LOx"/>
+                            <constraint firstItem="mDe-Or-zcS" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="PDd-96-UX0"/>
                             <constraint firstItem="kgG-kK-U0p" firstAttribute="centerX" secondItem="2OL-Uf-tNa" secondAttribute="centerX" id="WK7-PB-uUf"/>
                             <constraint firstItem="2OL-Uf-tNa" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="WUz-wC-rgP"/>
                             <constraint firstItem="kxZ-l4-diU" firstAttribute="centerY" secondItem="2OL-Uf-tNa" secondAttribute="centerY" id="WnF-wb-l85"/>
                             <constraint firstAttribute="trailingMargin" secondItem="Nhu-Or-RVG" secondAttribute="trailing" id="Z2X-BZ-F7h"/>
                             <constraint firstItem="Nhu-Or-RVG" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="dun-a8-YFy"/>
                             <constraint firstItem="Xka-23-PfG" firstAttribute="top" secondItem="kgG-kK-U0p" secondAttribute="bottom" constant="6" id="hCe-RW-dlL"/>
+                            <constraint firstItem="DTl-vP-hJE" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="izd-2V-JLs"/>
+                            <constraint firstItem="DTl-vP-hJE" firstAttribute="top" secondItem="mDe-Or-zcS" secondAttribute="bottom" constant="6" id="mc8-r4-FBI"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="DTl-vP-hJE" secondAttribute="trailing" id="oAI-M1-hCH"/>
                             <constraint firstItem="Nhu-Or-RVG" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" id="pJf-l4-okD"/>
+                            <constraint firstItem="mDe-Or-zcS" firstAttribute="top" secondItem="Xka-23-PfG" secondAttribute="bottom" constant="30" id="pJw-tD-CEb"/>
                             <constraint firstItem="kxZ-l4-diU" firstAttribute="leading" secondItem="2OL-Uf-tNa" secondAttribute="trailing" constant="12" id="yFz-f7-P4r"/>
                             <constraint firstItem="gH9-S6-t24" firstAttribute="centerY" secondItem="Xka-23-PfG" secondAttribute="centerY" id="yfy-WI-qFN"/>
                         </constraints>
@@ -84,6 +103,8 @@
                         <outlet property="fillSwitch" destination="Xka-23-PfG" id="XtP-1j-QFY"/>
                         <outlet property="finishButton" destination="kxZ-l4-diU" id="EAF-9R-U7L"/>
                         <outlet property="infoLabel" destination="Nhu-Or-RVG" id="xlU-z7-wsJ"/>
+                        <outlet property="profileButton" destination="mDe-Or-zcS" id="hDC-kM-mSE"/>
+                        <outlet property="profileLabel" destination="DTl-vP-hJE" id="Lvr-fD-cCE"/>
                         <outlet property="triangulateButton" destination="kgG-kK-U0p" id="mol-Yl-uAp"/>
                     </connections>
                 </viewController>

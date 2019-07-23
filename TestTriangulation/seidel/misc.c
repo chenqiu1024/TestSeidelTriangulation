@@ -46,7 +46,7 @@ int choose_segment()
 {
   int i;
 
-#ifdef DEBUG
+#ifdef DEBUG_SEIDEL
   fprintf(stderr, "choose_segment: %d\n", permute[choose_idx]);
 #endif 
   return permute[choose_idx++];
