@@ -185,10 +185,10 @@ int monotonate_trapezoids(SeidelTriangulator* state, int n)
   register int i;
   int tr_start;
 
-  memset((void *)state->vert, 0, sizeof(state->vert));
-  memset((void *)state->visited, 0, sizeof(state->visited));
-  memset((void *)state->mchain, 0, sizeof(state->mchain));
-  memset((void *)state->mon, 0, sizeof(state->mon));
+  memset((void *)state->vert, 0, sizeof(state->vert[0]) * state->segSize);
+  memset((void *)state->visited, 0, sizeof(state->visited[0]) * state->trSize);
+  memset((void *)state->mchain, 0, sizeof(state->mchain[0]) * state->trSize);
+  memset((void *)state->mon, 0, sizeof(state->mon[0]) * state->segSize);
   
   /* First locate a trapezoid which lies inside the polygon */
   /* and which is triangular */

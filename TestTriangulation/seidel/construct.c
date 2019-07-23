@@ -141,8 +141,8 @@ static int init_query_structure(SeidelTriangulator* state, int segnum)
   segment_t *s = &state->seg[segnum];
 
   state->q_idx = state->tr_idx = 1;
-  memset((void *)state->tr, 0, sizeof(state->tr));
-  memset((void *)state->qs, 0, sizeof(state->qs));
+  memset((void *)state->tr, 0, sizeof(state->tr[0]) * state->trSize);
+  memset((void *)state->qs, 0, sizeof(state->qs[0]) * state->qSize);
 
   i1 = newnode(state);
   state->qs[i1].nodetype = T_Y;
