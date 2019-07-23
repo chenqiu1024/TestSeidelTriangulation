@@ -8,20 +8,17 @@ extern double log2(double);
 extern double log2();
 #endif
 
-static int choose_idx;
-static int permute[SEGSIZE];
-
 
 /* Generate a random permutation of the segments 1..n */
-int generate_random_ordering(n)
-     int n;
+int generate_random_ordering(SeidelTriangulator* state, int n)
 {
   struct timeval tval;
   struct timezone tzone;
   register int i;
-  int m, st[SEGSIZE], *p;
+  int m, *p;
+  int* st = (int*)malloc(sizeof(int) * state->segSize);
   
-  choose_idx = 1;
+  state->choose_idx = 1;
   gettimeofday(&tval, &tzone);
   srand48(tval.tv_sec);
 
@@ -32,24 +29,25 @@ int generate_random_ordering(n)
   for (i = 1; i <= n; i++, p++)
     {
       m = lrand48() % (n + 1 - i) + 1;
-      permute[i] = p[m];
+      state->permute[i] = p[m];
       if (m != 1)
 	p[m] = p[1];
     }
+  free(st);
   return 0;
 }
 
   
 /* Return the next segment in the generated random ordering of all the */
 /* segments in S */
-int choose_segment()
+int choose_segment(SeidelTriangulator* state)
 {
   int i;
 
 #ifdef DEBUG_SEIDEL
-  fprintf(stderr, "choose_segment: %d\n", permute[choose_idx]);
+  fprintf(stderr, "choose_segment: %d\n", state->permute[state->choose_idx]);
 #endif 
-  return permute[choose_idx++];
+  return state->permute[state->choose_idx++];
 }
 
 

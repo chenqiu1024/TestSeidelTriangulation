@@ -520,7 +520,9 @@ bool isPolygonClockwise(const vector_float2* vertices, size_t verticesCount) {
         vertexStartIndex += polygonSize;
     }
     
-    triangulate_polygon((int)_polygonSizes.count, polygonSizes, (double(*)[2])vertices, (int(*)[3])triangles);
+    SeidelTriangulator* seidel = NULL;
+    triangulate_polygon(&seidel, (int)_polygonSizes.count, polygonSizes, (double(*)[2])vertices, (int(*)[3])triangles);
+    SeidelTriangulatorRelease(seidel);
     
     uint32_t* triangleLinesIndices = (uint32_t*) malloc(sizeof(uint32_t) * 6 * trianglesCount);
     uint32_t* trianglesIndices = (uint32_t*) malloc(sizeof(uint32_t) * 3 * trianglesCount);
@@ -606,10 +608,12 @@ bool isPolygonClockwise(const vector_float2* vertices, size_t verticesCount) {
     
     const int TestCount = 1024;
     NSDate* startTime = [NSDate date];
+    SeidelTriangulator* seidel = NULL;
     for (int i=TestCount; i>0; --i)
     {
-        triangulate_polygon((int)_polygonSizes.count, polygonSizes, (double(*)[2])vertices, (int(*)[3])triangles);
+        triangulate_polygon(&seidel, (int)_polygonSizes.count, polygonSizes, (double(*)[2])vertices, (int(*)[3])triangles);
     }
+    SeidelTriangulatorRelease(seidel);
     NSTimeInterval timeUsage = [[NSDate date] timeIntervalSinceDate:startTime];
     dispatch_async(dispatch_get_main_queue(), ^{
         self.profileLabel.text = [NSString stringWithFormat:@"%ld vertices, %ld holes, total %f ms for %d times, average %f ms for one triangulation", totalPolygonVertices, self.polygonSizes.count - 1, timeUsage * 1000, TestCount, timeUsage * 1000 / TestCount];
